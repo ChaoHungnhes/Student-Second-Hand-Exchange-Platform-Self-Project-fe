@@ -1,0 +1,8 @@
+{
+  "name": "UniTrade - Student Marketplace",
+  "description": "A secure, transparent internal marketplace for students to exchange and trade second-hand items with AI-powered moderation and assistant.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
