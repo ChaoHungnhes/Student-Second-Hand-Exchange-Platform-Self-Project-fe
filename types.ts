@@ -13,7 +13,8 @@ export enum UserStatus {
   ACTIVE = 'ACTIVE',
   WARNING = 'WARNING',
   RESTRICTED = 'RESTRICTED',
-  BLOCKED = 'BLOCKED'
+  BLOCKED = 'BLOCKED', 
+  INACTIVE = 'INACTIVE'
 }
 
 export enum UserRole {

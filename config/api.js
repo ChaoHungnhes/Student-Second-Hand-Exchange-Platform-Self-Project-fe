@@ -25,6 +25,8 @@ export const updatePasswordAPI = (data) => axios.patch("/s2s/user/update-passwor
 export const getMyStatsAPI = () => axios.get("/s2s/products/me/stats");
 export const getUserByIdAPI = (userId) => 
   axios.get(`/s2s/user/${userId}`);
+export const createUserAPI = (data) => 
+  axios.post("/s2s/user/create", data);
 // ====== API PRODUCTS ======
 export const getProductsAPI = (params) => {
   return axios.get("/s2s/products", {
@@ -142,6 +144,19 @@ export const updateAdminTransactionStatusAPI = (id, status) =>
 
 export const deleteAdminTransactionAPI = (id) =>
   axios.delete(`/s2s/transactions/admin/${id}`);
+
+// ====== API USERS ======
+export const getUsersAPI = ({ page = 1, size = 10, keyword, status, sortBy, sortDir } = {}) =>
+  axios.get('/s2s/user', { params: { page, size, keyword, status, sortBy, sortDir } });
+
+export const deleteUserAPI = (id) =>
+  axios.delete(`/s2s/user/delete/${id}`);
+
+export const updateUserAPI = (id, data) =>
+  axios.put(`/s2s/user/update/${id}`, data);
+
+export const patchUserStatusAPI = (id, status) =>
+  axios.patch(`/s2s/user/${id}/status`, { status });
 
 export const updateConversationStatusAPI = (id, status) =>
   axios.put(`/s2s/admin/conversations/${id}/status`, null, { params: { status } });
