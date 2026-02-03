@@ -160,17 +160,56 @@ export const getAdminProductsAPI = ({ page = 1, size = 10, keyword, categoryId, 
   return axios.get('/s2s/products/admin', { params });
 };
 
+// export const createAdminProductAPI = (data, images = []) => {
+//   const form = new FormData();
+//   form.append('data', JSON.stringify(data));
+//   if (images && images.length) {
+//     images.forEach((f) => form.append('images', f));
+//   }
+//   return axios.post('/s2s/products', form, {
+//     headers: { 'Content-Type': 'multipart/form-data' }
+//   });
+// };
 export const createAdminProductAPI = (data, images = []) => {
   const form = new FormData();
-  form.append('data', JSON.stringify(data));
-  if (images && images.length) {
-    images.forEach((f) => form.append('images', f));
+  const jsonBlob = new Blob([JSON.stringify(data)], {
+    type: 'application/json'
+  });
+  
+  form.append('data', jsonBlob);
+  if (images && images.length > 0) {
+    for (let i = 0; i < images.length; i++) {
+      form.append('images', images[i]);
+    }
   }
-  return axios.post('/s2s/products', form, {
-    headers: { 'Content-Type': 'multipart/form-data' }
+  return axios.post('/s2s/products', form);
+};
+
+export const updateAdminProductAPI = (id, data) => {
+  return axios.put(`/s2s/products/admin/${id}`, data);
+};
+
+export const changeProductStatusAPI = (id, status) => {
+  return axios.patch(`/s2s/products/admin/${id}/status`, null, {
+    params: { 
+      status: status 
+    }
   });
 };
 
+export const deleteAdminProductAPI = (id) => {
+    return axios.delete(`/s2s/products/admin/${id}`);
+};
+
+// APPROVE (Duyệt) - Body: { adminNote, version }
+export const approveProductAPI = (id, data) => {
+    return axios.post(`/s2s/products/${id}/approve`, data);
+};
+
+// REJECT (Từ chối) - Body: { adminNote, version }
+export const rejectProductAPI = (id, data) => {
+    return axios.post(`/s2s/products/${id}/reject`, data);
+};
 
 export const deleteUserAPI = (id) =>
   axios.delete(`/s2s/user/delete/${id}`);

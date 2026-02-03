@@ -4,32 +4,6 @@ import ProductCard from '../components/ProductCard';
 import { Product, ProductParams, Category } from '../types/index';
 import { getProductsAPI, getCategoriesAPI } from '../config/api';
 
-// Lightweight mock exported for admin pages which expect sample products
-export const MOCK_PRODUCTS: Product[] = [
-  {
-    id: 'p1',
-    title: 'Giáo trình Giải tích 1 - ĐH Bách Khoa',
-    description: 'Giáo trình dùng cho sinh viên kỹ thuật, còn mới.',
-    price: 35000,
-    imageUrls: ['https://picsum.photos/seed/book1/400/300'],
-    categoryName: 'Sách Giáo Khoa',
-    sellerName: 'Nguyễn Văn Nam',
-    sellerId: 's1',
-    sellerRating: 4.5,
-    sellerAvatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Seller1',
-    status: 'APPROVED',
-    aiStatus: 'OK' as any,
-    aiNote: undefined,
-    createdAt: new Date().toISOString(),
-    city: 'Hà Nội',
-    district: '',
-    ward: '',
-    addressDetail: '',
-    owner: false,
-    buyerInfo: null
-  }
-];
-
 const Home: React.FC = () => {
   const navigate = useNavigate();
   
