@@ -149,6 +149,29 @@ export const deleteAdminTransactionAPI = (id) =>
 export const getUsersAPI = ({ page = 1, size = 10, keyword, status, sortBy, sortDir } = {}) =>
   axios.get('/s2s/user', { params: { page, size, keyword, status, sortBy, sortDir } });
 
+// ====== API PRODUCTS (ADMIN) ======
+export const getAdminProductsAPI = ({ page = 1, size = 10, keyword, categoryId, sellerId, status, aiStatus, sortBy = 'createdAt', sortDir = 'DESC' } = {}) => {
+  const params = { page, size, sortBy, sortDir };
+  if (keyword) params.keyword = keyword;
+  if (categoryId) params.categoryId = categoryId;
+  if (sellerId) params.sellerId = sellerId;
+  if (status && status.length > 0) params.status = Array.isArray(status) ? status.join(',') : status;
+  if (aiStatus) params.aiStatus = aiStatus;
+  return axios.get('/s2s/products/admin', { params });
+};
+
+export const createAdminProductAPI = (data, images = []) => {
+  const form = new FormData();
+  form.append('data', JSON.stringify(data));
+  if (images && images.length) {
+    images.forEach((f) => form.append('images', f));
+  }
+  return axios.post('/s2s/products', form, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  });
+};
+
+
 export const deleteUserAPI = (id) =>
   axios.delete(`/s2s/user/delete/${id}`);
 

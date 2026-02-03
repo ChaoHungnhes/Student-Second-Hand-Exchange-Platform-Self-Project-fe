@@ -59,8 +59,9 @@ export interface Product {
   sellerAvatar?: string; // (Dự phòng nếu sau này có)
 
   status: string;       // APPROVED, SOLD...
-  aiStatus?: string;
-  aiNote?: string;
+  aiStatus?: string;    // OK, WARNING, SCAM, SPAM, PENDING
+  aiNote?: string;      // AI moderation note
+  adminNote?: string;   // Admin note
   createdAt: string;
   city?: string;
   district?: string;

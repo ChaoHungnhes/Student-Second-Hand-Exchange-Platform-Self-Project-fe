@@ -25,7 +25,9 @@ export enum UserRole {
 export enum AIStatus {
   OK = 'OK',
   WARNING = 'WARNING',
-  SPAM = 'SPAM'
+  SCAM = 'SCAM',
+  SPAM = 'SPAM',
+  PENDING = 'PENDING'
 }
 
 export interface User {
