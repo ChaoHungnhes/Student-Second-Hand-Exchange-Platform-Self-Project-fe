@@ -47,14 +47,25 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   useEffect(() => {
     const initAuth = async () => {
       try {
-        // Ép kiểu 'as unknown as ...' vì axios interceptor đã unwrap data, 
-        // nhưng TS mặc định vẫn tưởng là AxiosResponse
-        const introRes = await introspectAPI() as unknown as IntrospectResponse;
+        console.log("[AuthContext] Bắt đầu kiểm tra login...");
+        
+        // Tạo Promise timeout 3s để tránh treo mãi
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("Introspect timeout")), 1000)
+        );
+        
+        const introRes = await Promise.race([
+          introspectAPI() as unknown as Promise<IntrospectResponse>,
+          timeoutPromise
+        ]) as unknown as IntrospectResponse;
+        
+        console.log("[AuthContext] introspectAPI result:", introRes);
         
         if (introRes?.valid) {
             // Token còn hạn -> Gọi API lấy thông tin chi tiết user
             try {
                 const infoRes = await getMyInfoAPI();
+                console.log("[AuthContext] getMyInfoAPI result:", infoRes);
                 if(infoRes) {
                     const userData = parseUser(infoRes);
                     setUser(userData);
@@ -63,7 +74,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                     return; 
                 }
             } catch (err) {
-                console.warn("Mạng chậm hoặc lỗi lấy info, dùng tạm cache cũ");
+                console.warn("[AuthContext] Mạng chậm hoặc lỗi lấy info, dùng tạm cache cũ", err);
             }
             
             // Fallback: Nếu API getMyInfo lỗi, lấy tạm từ localStorage
@@ -71,11 +82,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             if (cachedStr) setUser(JSON.parse(cachedStr));
         } else {
             // Token hết hạn
+            console.log("[AuthContext] Token hết hạn hoặc không hợp lệ");
             handleCleanup();
         }
       } catch (error) {
+        console.error("[AuthContext] Lỗi initAuth:", error);
         handleCleanup();
       } finally {
+        console.log("[AuthContext] Hoàn thành kiểm tra, set loading=false");
         setLoading(false);
       }
     };

@@ -1,33 +1,32 @@
-
 export enum ProductStatus {
-  DRAFT = 'DRAFT',
-  PENDING = 'PENDING',
-  APPROVED = 'APPROVED',
-  REJECTED = 'REJECTED',
-  IN_NEGOTIATION = 'IN_NEGOTIATION',
-  SOLD = 'SOLD',
-  ARCHIVED = 'ARCHIVED'
+  DRAFT = "DRAFT",
+  PENDING = "PENDING",
+  APPROVED = "APPROVED",
+  REJECTED = "REJECTED",
+  IN_NEGOTIATION = "IN_NEGOTIATION",
+  SOLD = "SOLD",
+  ARCHIVED = "ARCHIVED",
 }
 
 export enum UserStatus {
-  ACTIVE = 'ACTIVE',
-  WARNING = 'WARNING',
-  RESTRICTED = 'RESTRICTED',
-  BLOCKED = 'BLOCKED', 
-  INACTIVE = 'INACTIVE'
+  ACTIVE = "ACTIVE",
+  WARNING = "WARNING",
+  RESTRICTED = "RESTRICTED",
+  BLOCKED = "BLOCKED",
+  INACTIVE = "INACTIVE",
 }
 
 export enum UserRole {
-  USER = 'USER',
-  ADMIN = 'ADMIN'
+  USER = "USER",
+  ADMIN = "ADMIN",
 }
 
 export enum AIStatus {
-  OK = 'OK',
-  WARNING = 'WARNING',
-  SCAM = 'SCAM',
-  SPAM = 'SPAM',
-  PENDING = 'PENDING'
+  OK = "OK",
+  WARNING = "WARNING",
+  SCAM = "SCAM",
+  SPAM = "SPAM",
+  PENDING = "PENDING",
 }
 
 export interface User {
@@ -59,7 +58,6 @@ export interface Product {
   createdAt: string;
   // Location
   city: string;
-  district: string;
   ward: string;
   addressDetail: string;
   // Admin feedback
@@ -75,7 +73,7 @@ export interface Conversation {
   buyerId: string;
   sellerId: string;
   lastMessage?: string;
-  status: 'OPEN' | 'CLOSED';
+  status: "OPEN" | "CLOSED";
 }
 
 export interface Message {
@@ -86,12 +84,12 @@ export interface Message {
 }
 
 export enum ReportReason {
-  SPAM = 'SPAM',
-  FRAUD = 'FRAUD',
-  ABUSIVE_LANGUAGE = 'ABUSIVE_LANGUAGE',
-  FAKE_PRODUCT = 'FAKE_PRODUCT',
-  OTHER = 'OTHER',
-  SCAM = 'SCAM'
+  SPAM = "SPAM",
+  FRAUD = "FRAUD",
+  ABUSIVE_LANGUAGE = "ABUSIVE_LANGUAGE",
+  FAKE_PRODUCT = "FAKE_PRODUCT",
+  OTHER = "OTHER",
+  SCAM = "SCAM",
 }
 
 export interface Review {
@@ -108,42 +106,37 @@ export interface Review {
   reviewerAvatar?: string; // Có thể dùng dicebear nếu BE không trả về
 }
 
-
-
-
-
 //------------------------------------------------------------------------------------------------
 
-
 export enum TransactionStatus {
-  PENDING = 'PENDING',
-  COMPLETED = 'COMPLETED',
-  CANCELLED = 'CANCELLED'
+  PENDING = "PENDING",
+  COMPLETED = "COMPLETED",
+  CANCELLED = "CANCELLED",
 }
 
 // Fixed: Changed BLOCKED key to CLOSED to resolve property access error in AdminConversations
 export enum ConversationStatus {
-  ACTIVE = 'ACTIVE',
-  CLOSED = 'CLOSED'
+  ACTIVE = "ACTIVE",
+  CLOSED = "CLOSED",
 }
 
 export enum AuditAction {
-  APPROVE = 'APPROVE',
-  REJECT = 'REJECT',
-  DELETE = 'DELETE',
-  BLOCK = 'BLOCK',
-  UNBLOCK = 'UNBLOCK',
-  UPDATE_ROLE = 'UPDATE_ROLE',
-  STATUS_CHANGE = 'STATUS_CHANGE',
-  LOGIN = 'LOGIN'
+  APPROVE = "APPROVE",
+  REJECT = "REJECT",
+  DELETE = "DELETE",
+  BLOCK = "BLOCK",
+  UNBLOCK = "UNBLOCK",
+  UPDATE_ROLE = "UPDATE_ROLE",
+  STATUS_CHANGE = "STATUS_CHANGE",
+  LOGIN = "LOGIN",
 }
 
 export enum AuditTargetType {
-  PRODUCT = 'PRODUCT',
-  USER = 'USER',
-  TRANSACTION = 'TRANSACTION',
-  CONVERSATION = 'CONVERSATION',
-  SYSTEM = 'SYSTEM'
+  PRODUCT = "PRODUCT",
+  USER = "USER",
+  TRANSACTION = "TRANSACTION",
+  CONVERSATION = "CONVERSATION",
+  SYSTEM = "SYSTEM",
 }
 
 export interface User {
@@ -176,7 +169,6 @@ export interface Product {
   imageUrls: string[];
   createdAt: string;
   city: string;
-  district: string;
   ward: string;
   addressDetail: string | null;
   adminNote?: string | null;

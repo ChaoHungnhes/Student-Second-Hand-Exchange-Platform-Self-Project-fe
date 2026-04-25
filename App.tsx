@@ -31,11 +31,13 @@ const App: React.FC = () => {
               <Route path="/login" element={<AuthPage />} />
               <Route path="/products" element={<AllProductsPage />} />
               <Route path="/products/:id" element={<ProductDetailPage />} />
-              <Route path="/user/:userId" element={<UserProfilePage />} />
 
               {/* Private Routes (Phải đăng nhập mới vào được) */}
               <Route path="/profile" element={
                 <ProtectedRoute><ProfilePage /></ProtectedRoute>
+              } />
+              <Route path="/user/:userId" element={
+                <ProtectedRoute><UserProfilePage /></ProtectedRoute> 
               } />
               <Route path="/my-shop" element={
                 <ProtectedRoute><MyShopPage /></ProtectedRoute>

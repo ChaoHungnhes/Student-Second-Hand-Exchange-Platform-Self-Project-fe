@@ -4,8 +4,18 @@ import { useAuth } from "../context/AuthContext";
 
 export default function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
+
+  console.log("[ProtectedRoute] loading:", loading, "user:", user ? "✓ có user" : "✗ không user");
+
+  // show a spinner while still validating
   if (loading) return <div style={{ padding: 24 }}>Đang tải…</div>;
-  if (!user) return <Navigate to="/login" replace />;
+  
+  // if check finished and there's no user, redirect to login
+  if (!user) {
+    console.log("[ProtectedRoute] redirect to /login");
+    return <Navigate to="/login" replace />;
+  }
+
   return children;
 }
 //giới hạn theo vai trò

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
 import { Product, ProductParams, Category } from '../types/index';
@@ -6,6 +6,7 @@ import { getProductsAPI, getCategoriesAPI } from '../config/api';
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
   
   // Data State
   const [products, setProducts] = useState<Product[]>([]);
@@ -67,17 +68,19 @@ const Home: React.FC = () => {
 
   // Debounce fetch products khi filter thay đổi
   useEffect(() => {
-    const timer = setTimeout(() => {
+    timerRef.current = setTimeout(() => {
       fetchProducts();
     }, 300);
-    return () => clearTimeout(timer);
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
   }, [activeCategoryId, minPrice, maxPrice, sortDir]);
 
   return (
     <div className="space-y-8 pb-20">
       {/* Hero Section */}
       <section className="relative h-[400px] rounded-3xl overflow-hidden bg-indigo-900 text-white flex items-center">
-        <img src="https://images.unsplash.com/photo-1523050335192-ce1dee71a01f?auto=format&fit=crop&q=80&w=2070" alt="campus" className="absolute inset-0 w-full h-full object-cover opacity-30" />
+        <img src="https://images.unsplash.com/photo-1519389950473-47ba0277781c" alt="campus" className="absolute inset-0 w-full h-full object-cover opacity-30" />
         <div className="relative z-10 px-8 md:px-16 max-w-2xl">
           <h1 className="text-4xl md:text-5xl font-extrabold mb-4 leading-tight">Cách Thông Minh Để Sinh Viên <span className="text-indigo-400">Trao Đổi</span>.</h1>
           <p className="text-lg text-indigo-100 mb-8">Chợ nội bộ sinh viên đã xác thực. Mua rẻ hơn, bán nhanh hơn và cùng nhau xây dựng cộng đồng bền vững.</p>
@@ -126,12 +129,19 @@ const Home: React.FC = () => {
             </div>
             <div className="space-y-2">
                 <label className="text-xs font-bold text-gray-500 uppercase">Sắp xếp</label>
-                 <select value={sortDir} onChange={(e) => setSortDir(e.target.value as any)} className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                 <select value={sortDir} onChange={(e) => setSortDir(e.target.value as 'desc' | 'asc')} className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     <option value="desc">Mới nhất</option>
                     <option value="asc">Cũ nhất</option>
                 </select>
             </div>
-             <button onClick={() => { setMinPrice(''); setMaxPrice(''); setActiveCategoryId('ALL'); }} className="text-gray-500 text-sm font-medium hover:text-indigo-600 transition-colors h-10 flex items-center justify-center"><i className="fa-solid fa-rotate-right mr-2"></i> Đặt lại</button>
+             <button onClick={() => { 
+               if (timerRef.current) clearTimeout(timerRef.current);
+               setMinPrice(''); 
+               setMaxPrice(''); 
+               setActiveCategoryId('ALL'); 
+               setSortDir('desc'); 
+               fetchProducts(); 
+             }} className="text-gray-500 text-sm font-medium hover:text-indigo-600 transition-colors h-10 flex items-center justify-center"><i className="fa-solid fa-rotate-right mr-2"></i> Đặt lại</button>
          </div>
       </section>
 

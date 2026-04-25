@@ -68,6 +68,13 @@ export const deleteProductAPI = (id) => {
 };
 // ====== API CATEGORIES ======
 export const getCategoriesAPI = () => axios.get("/s2s/categories");
+export const forwardGeocodeAPI = (data) =>
+  axios.post("/s2s/geocoding/forward", data);
+
+export const reverseGeocodeAPI = (lat, lng) =>
+  axios.get("/s2s/geocoding/reverse", {
+    params: { lat, lng }
+  });
 
 // ====== API TRANSACTIONS ======
 export const getMyPurchasesAPI = () => axios.get("/s2s/transactions/my-purchases");

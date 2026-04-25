@@ -25,7 +25,7 @@ export interface LoginResponse {
   token: string;
   name: string;
   // Backend có thể trả về "role" (string) hoặc "roles" (array), khai báo cả 2 cho chắc
-  role?: string | string[]; 
+  role?: string | string[];
   roles?: string | string[];
   authenticated: boolean;
   avatar?: string;
@@ -51,23 +51,22 @@ export interface Product {
   price: number;
   imageUrls: string[];
   categoryName: string;
-  
+
   // Thông tin người bán
   sellerName: string;
-  sellerId: string;      // Mới thêm
-  sellerRating: number;  // Mới thêm
+  sellerId: string; // Mới thêm
+  sellerRating: number; // Mới thêm
   sellerAvatar?: string; // (Dự phòng nếu sau này có)
 
-  status: string;       // APPROVED, SOLD...
-  aiStatus?: string;    // OK, WARNING, SCAM, SPAM, PENDING
-  aiNote?: string;      // AI moderation note
-  adminNote?: string;   // Admin note
+  status: string; // APPROVED, SOLD...
+  aiStatus?: string; // OK, WARNING, SCAM, SPAM, PENDING
+  aiNote?: string; // AI moderation note
+  adminNote?: string; // Admin note
   createdAt: string;
   city?: string;
-  district?: string;
   ward?: string;
   addressDetail?: string;
-  owner: boolean;       // true nếu người xem là chủ bài đăng
+  owner: boolean; // true nếu người xem là chủ bài đăng
   buyerInfo?: BuyerInfo | null; // Thông tin người mua (nếu đã bán)
 }
 
@@ -95,12 +94,12 @@ export interface ProductParams {
   keyword?: string;
   minPrice?: string | number;
   maxPrice?: string | number;
-  category?: string; 
+  category?: string;
   categoryId?: number;
-  status?: string;   
-  sortDir?: 'asc' | 'desc';
+  status?: string;
+  sortDir?: "asc" | "desc";
   sortBy?: string;
-} 
+}
 
 export interface Category {
   id: number;
@@ -111,13 +110,13 @@ export interface Transaction {
   transactionId: string;
   transactionStatus: string;
   purchaseDate: string;
-  
+
   productId: string;
   productTitle: string;
   productPrice: number;
   productThumbnail: string;
   productStatus: string;
-  
+
   sellerName: string;
   sellerId: string;
 }
@@ -135,4 +134,3 @@ export interface Conversation {
   lastMessageTime: string;
   unreadCount: number;
 }
-
