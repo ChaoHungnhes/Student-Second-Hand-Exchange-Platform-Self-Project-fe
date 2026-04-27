@@ -33,6 +33,10 @@ export const getProductsAPI = (params) => {
     params: params 
   });
 };
+export const getNearbyProductsAPI = ({ lat, lng, radius, page = 1, size = 6 }) =>
+  axios.get("/s2s/products/nearby", {
+    params: { lat, lng, radius, page, size }
+  });
 export const getProductDetailAPI = (id) => axios.get(`/s2s/products/${id}`);
 
 export const createDraftProductAPI = (data) => 

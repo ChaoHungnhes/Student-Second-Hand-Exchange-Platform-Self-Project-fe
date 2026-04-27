@@ -73,7 +73,7 @@ export interface Conversation {
   buyerId: string;
   sellerId: string;
   lastMessage?: string;
-  status: "OPEN" | "CLOSED";
+  status: ConversationStatus;
 }
 
 export interface Message {
@@ -114,7 +114,6 @@ export enum TransactionStatus {
   CANCELLED = "CANCELLED",
 }
 
-// Fixed: Changed BLOCKED key to CLOSED to resolve property access error in AdminConversations
 export enum ConversationStatus {
   ACTIVE = "ACTIVE",
   CLOSED = "CLOSED",

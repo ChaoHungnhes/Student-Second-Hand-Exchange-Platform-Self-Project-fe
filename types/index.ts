@@ -49,6 +49,7 @@ export interface Product {
   title: string;
   description: string;
   price: number;
+  categoryId?: number;
   imageUrls: string[];
   categoryName: string;
 
@@ -66,6 +67,8 @@ export interface Product {
   city?: string;
   ward?: string;
   addressDetail?: string;
+  latitude?: number;
+  longitude?: number;
   owner: boolean; // true nếu người xem là chủ bài đăng
   buyerInfo?: BuyerInfo | null; // Thông tin người mua (nếu đã bán)
 }
@@ -86,6 +89,31 @@ export interface MetaData {
 export interface ProductResponse {
   meta: MetaData;
   result: Product[];
+}
+
+export interface NearbyProduct {
+  id: string;
+  title: string;
+  description?: string;
+  price: number;
+  imageUrls: string[];
+  city?: string;
+  ward?: string;
+  addressDetail?: string;
+  categoryName?: string;
+  sellerName?: string;
+  sellerId?: string;
+  sellerRating?: number;
+  createdAt?: string;
+  status?: string;
+  latitude?: number;
+  longitude?: number;
+  distanceKm: number;
+}
+
+export interface NearbyProductsResponse {
+  meta: MetaData;
+  result: NearbyProduct[];
 }
 
 export interface ProductParams {

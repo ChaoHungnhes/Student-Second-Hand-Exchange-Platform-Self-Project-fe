@@ -10,7 +10,7 @@ interface Props {
   onDelete?: (id: string) => void;
 }
 
-const AdminConversations: React.FC<Props> = ({ conversations: propConversations = [], onUpdateStatus, onDelete }) => {
+const AdminConversations: React.FC<Props> = ({ conversations: propConversations, onUpdateStatus, onDelete }) => {
   const navigate = useNavigate();
   const [keyword, setKeyword] = useState('');
   const [statusFilter, setStatusFilter] = useState<'ALL' | ConversationStatus>('ALL');
@@ -22,6 +22,7 @@ const AdminConversations: React.FC<Props> = ({ conversations: propConversations 
   const [updatingConversationId, setUpdatingConversationId] = useState<string | null>(null);
   const [deletingConversationId, setDeletingConversationId] = useState<string | null>(null);
   const pageSize = 10;
+  const fallbackConversations = propConversations ?? [];
 
   useEffect(() => {
     const fetchConvs = async () => {
@@ -37,11 +38,11 @@ const AdminConversations: React.FC<Props> = ({ conversations: propConversations 
         } else if (Array.isArray(res)) {
           setAllConversations(res);
         } else {
-          setAllConversations(propConversations as any);
+          setAllConversations(fallbackConversations as any);
         }
       } catch (e) {
         console.error('Failed to fetch admin conversations', e);
-        setAllConversations(propConversations as any);
+        setAllConversations(fallbackConversations as any);
       } finally {
         setLoading(false);
       }
@@ -57,7 +58,7 @@ const AdminConversations: React.FC<Props> = ({ conversations: propConversations 
       if (keyword) {
         const kw = keyword.toLowerCase();
         result = result.filter(c => 
-          (c.productName || c.productTitle || '').toLowerCase().includes(kw) || 
+          (c.productTitle || '').toLowerCase().includes(kw) || 
           (c.buyerName || '').toLowerCase().includes(kw) || 
           (c.sellerName || '').toLowerCase().includes(kw) ||
           (c.id || '').toLowerCase().includes(kw)
@@ -192,9 +193,9 @@ const handleDeleteConversation = async (id: string) => {
               <tr key={c.id} className="hover:bg-gray-50/50 transition-colors">
                 <td className="px-8 py-5">
                   <div className="flex items-center gap-3 cursor-pointer group" onClick={() => navigate(`/products/${c.productId}`)}>
-                    <img src={getImageUrl(c.productImage)} className="w-10 h-10 rounded-xl object-cover" alt={c.productName || c.productTitle || 'product'} />
+                    <img src={getImageUrl(c.productImage)} className="w-10 h-10 rounded-xl object-cover" alt={c.productTitle || 'product'} />
                     <div className="max-w-[150px]">
-                      <p className="text-sm font-black text-gray-900 truncate group-hover:text-indigo-600">{c.productName || c.productTitle}</p>
+                      <p className="text-sm font-black text-gray-900 truncate group-hover:text-indigo-600">{c.productTitle}</p>
                       <p className="text-[8px] text-gray-400 font-bold uppercase">ID: {c.id.substring(0,8)}...</p>
                     </div>
                   </div>

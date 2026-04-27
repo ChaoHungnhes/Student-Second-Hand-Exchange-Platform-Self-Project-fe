@@ -40,6 +40,8 @@ const AdminProductManagement: React.FC = () => {
     city: "",
     ward: "",
     addressDetail: "",
+    latitude: "",
+    longitude: "",
     status: "PENDING",
   });
   // CŨ: const [newImages, setNewImages] = useState<FileList | null>(null);
@@ -111,6 +113,8 @@ const AdminProductManagement: React.FC = () => {
       city: "",
       ward: "",
       addressDetail: "",
+      latitude: "",
+      longitude: "",
       status: "PENDING",
     });
     setNewImages([]);
@@ -120,7 +124,18 @@ const AdminProductManagement: React.FC = () => {
   const handleCreateSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const payload = { ...newProductData };
+      const payload = {
+        ...newProductData,
+        categoryId: newProductData.categoryId
+          ? Number(newProductData.categoryId)
+          : null,
+        latitude: newProductData.latitude
+          ? Number(newProductData.latitude)
+          : null,
+        longitude: newProductData.longitude
+          ? Number(newProductData.longitude)
+          : null,
+      };
 
       // ✅ SỬA: newImages đã là mảng rồi, dùng trực tiếp luôn
       const imgs = newImages;
@@ -173,6 +188,14 @@ const AdminProductManagement: React.FC = () => {
       city: product.city || "",
       ward: product.ward || "",
       addressDetail: product.addressDetail || "",
+      latitude:
+        product.latitude !== undefined && product.latitude !== null
+          ? String(product.latitude)
+          : "",
+      longitude:
+        product.longitude !== undefined && product.longitude !== null
+          ? String(product.longitude)
+          : "",
     });
     setIsEditModalOpen(true);
   };
@@ -183,8 +206,21 @@ const AdminProductManagement: React.FC = () => {
     try {
       if (!editingProduct) return;
 
+      const payload = {
+        ...editingProduct,
+        categoryId: editingProduct.categoryId
+          ? Number(editingProduct.categoryId)
+          : null,
+        latitude: editingProduct.latitude
+          ? Number(editingProduct.latitude)
+          : null,
+        longitude: editingProduct.longitude
+          ? Number(editingProduct.longitude)
+          : null,
+      };
+
       // Gọi API PUT
-      await updateAdminProductAPI(editingProduct.id, editingProduct);
+      await updateAdminProductAPI(editingProduct.id, payload);
 
       alert("Cập nhật thành công!");
       setIsEditModalOpen(false);
@@ -243,9 +279,6 @@ const AdminProductManagement: React.FC = () => {
       </h1>
 
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-black text-gray-900 tracking-tight">
-          Tất cả sản phẩm
-        </h1>
         <button
           onClick={openCreateModal}
           className="px-4 py-2 bg-indigo-600 text-white rounded-2xl font-bold"
@@ -289,7 +322,7 @@ const AdminProductManagement: React.FC = () => {
                     placeholder="Seller ID"
                     value={newProductData.sellerId}
                     onChange={(e) =>
-                      setNewProductData((prev) => ({
+                      setNewProductData((prev: any) => ({
                         ...prev,
                         sellerId: e.target.value,
                       }))
@@ -300,7 +333,7 @@ const AdminProductManagement: React.FC = () => {
                     placeholder="Category ID"
                     value={newProductData.categoryId}
                     onChange={(e) =>
-                      setNewProductData((prev) => ({
+                      setNewProductData((prev: any) => ({
                         ...prev,
                         categoryId: e.target.value,
                       }))
@@ -311,7 +344,7 @@ const AdminProductManagement: React.FC = () => {
                     placeholder="Title"
                     value={newProductData.title}
                     onChange={(e) =>
-                      setNewProductData((prev) => ({
+                      setNewProductData((prev: any) => ({
                         ...prev,
                         title: e.target.value,
                       }))
@@ -323,7 +356,7 @@ const AdminProductManagement: React.FC = () => {
                     rows={3}
                     value={newProductData.description}
                     onChange={(e) =>
-                      setNewProductData((prev) => ({
+                      setNewProductData((prev: any) => ({
                         ...prev,
                         description: e.target.value,
                       }))
@@ -335,7 +368,7 @@ const AdminProductManagement: React.FC = () => {
                     type="number"
                     value={newProductData.price}
                     onChange={(e) =>
-                      setNewProductData((prev) => ({
+                      setNewProductData((prev: any) => ({
                         ...prev,
                         price: Number(e.target.value),
                       }))
@@ -347,7 +380,7 @@ const AdminProductManagement: React.FC = () => {
                     aria-label="Trạng thái"
                     value={newProductData.status}
                     onChange={(e) =>
-                      setNewProductData((prev) => ({
+                      setNewProductData((prev: any) => ({
                         ...prev,
                         status: e.target.value,
                       }))
@@ -365,7 +398,7 @@ const AdminProductManagement: React.FC = () => {
                     placeholder="City"
                     value={newProductData.city}
                     onChange={(e) =>
-                      setNewProductData((prev) => ({
+                      setNewProductData((prev: any) => ({
                         ...prev,
                         city: e.target.value,
                       }))
@@ -376,7 +409,7 @@ const AdminProductManagement: React.FC = () => {
                     placeholder="Ward"
                     value={newProductData.ward}
                     onChange={(e) =>
-                      setNewProductData((prev) => ({
+                      setNewProductData((prev: any) => ({
                         ...prev,
                         ward: e.target.value,
                       }))
@@ -387,7 +420,7 @@ const AdminProductManagement: React.FC = () => {
                     placeholder="Address detail"
                     value={newProductData.addressDetail}
                     onChange={(e) =>
-                      setNewProductData((prev) => ({
+                      setNewProductData((prev: any) => ({
                         ...prev,
                         addressDetail: e.target.value,
                       }))
@@ -397,6 +430,33 @@ const AdminProductManagement: React.FC = () => {
 
                   {/* Phần chọn ảnh */}
                   <div className="col-span-2">
+                    <input
+                      placeholder="Latitude"
+                      type="number"
+                      step="any"
+                      value={newProductData.latitude}
+                      onChange={(e) =>
+                        setNewProductData((prev: any) => ({
+                          ...prev,
+                          latitude: e.target.value,
+                        }))
+                      }
+                      className="px-4 py-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
+                    />
+                    <input
+                      placeholder="Longitude"
+                      type="number"
+                      step="any"
+                      value={newProductData.longitude}
+                      onChange={(e) =>
+                        setNewProductData((prev: any) => ({
+                          ...prev,
+                          longitude: e.target.value,
+                        }))
+                      }
+                      className="px-4 py-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
+                    />
+
                     <label
                       htmlFor="product-images"
                       className="text-sm font-bold block mb-2 text-gray-700"
@@ -706,6 +766,41 @@ const AdminProductManagement: React.FC = () => {
                             setEditingProduct({
                               ...editingProduct,
                               addressDetail: e.target.value,
+                            })
+                          }
+                          className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:border-indigo-500 outline-none bg-white"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs font-bold text-gray-500 mb-1 block">
+                          Latitude
+                        </label>
+                        <input
+                          type="number"
+                          step="any"
+                          value={editingProduct.latitude || ""}
+                          onChange={(e) =>
+                            setEditingProduct({
+                              ...editingProduct,
+                              latitude: e.target.value,
+                            })
+                          }
+                          className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:border-indigo-500 outline-none bg-white"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-xs font-bold text-gray-500 mb-1 block">
+                          Longitude
+                        </label>
+                        <input
+                          type="number"
+                          step="any"
+                          value={editingProduct.longitude || ""}
+                          onChange={(e) =>
+                            setEditingProduct({
+                              ...editingProduct,
+                              longitude: e.target.value,
                             })
                           }
                           className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:border-indigo-500 outline-none bg-white"

@@ -12,6 +12,7 @@ import AllProductsPage from './pages/AllProductsPage';
 import PostProductPage from './pages/PostProductPage';
 import ConversationPage from './pages/ConversationPage';
 import ConversationListPage from './pages/ConversationListPage';
+import NearbyProductsPage from './pages/NearbyProductsPage';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import RoleRoute from './components/RoleRoute';
@@ -30,6 +31,7 @@ const App: React.FC = () => {
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<AuthPage />} />
               <Route path="/products" element={<AllProductsPage />} />
+              <Route path="/nearby-products" element={<NearbyProductsPage />} />
               <Route path="/products/:id" element={<ProductDetailPage />} />
 
               {/* Private Routes (Phải đăng nhập mới vào được) */}

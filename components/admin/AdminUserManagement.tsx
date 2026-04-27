@@ -191,7 +191,7 @@ const AdminUserManagement: React.FC<Props> = ({ users: initialUsers = [], onAdd,
                 <td className="px-8 py-5">
                   <div className="flex items-center gap-4">
                     <img src={u.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${u.name}`} 
-                alt={u.name}  className="w-12 h-12 rounded-full border-2 border-white shadow-sm" alt="av" />
+                alt={u.name}  className="w-12 h-12 rounded-full border-2 border-white shadow-sm" />
                     <div className="max-w-[180px]">
                       <p className="text-sm font-black text-gray-900 truncate">{u.name}</p>
           {isAddModalOpen && (
