@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 // Import thêm searchConversationsAPI
 import { getConversationsAPI, checkUserOnlineAPI, searchConversationsAPI } from '../config/api';
 import { getImageUrl } from '../utils/imageHelper'; 
+import { triggerRefreshUnreadCount } from '../utils/eventBus';
 
 // Interface khớp với API response
 interface ConversationItem {
@@ -78,6 +79,7 @@ const ConversationListPage: React.FC = () => {
       // Xử lý dữ liệu trả về (support cả 2 cấu trúc response nếu có)
       const list: ConversationItem[] = res?.data || res || [];
       setConversations(list);
+      triggerRefreshUnreadCount();
 
       // Check online cho danh sách vừa tải được
       if (list.length > 0) {
@@ -118,6 +120,17 @@ const ConversationListPage: React.FC = () => {
   const handleNavigate = (chat: ConversationItem) => {
     navigate(`/chat/${chat.id}`, { state: { conversationDetails: chat } });
   };
+
+  useEffect(() => {
+    const handleVisibilityRefresh = () => {
+      if (document.visibilityState === 'visible') {
+        fetchConversations(keyword);
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityRefresh);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityRefresh);
+  }, [keyword]);
 
   if (!user) return <div className="p-20 text-center">Vui lòng đăng nhập để xem tin nhắn.</div>;
 

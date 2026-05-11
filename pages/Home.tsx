@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
+import RecommendedProductsSection from '../components/RecommendedProductsSection';
 import { Product, ProductParams, Category } from '../types/index';
 import { getProductsAPI, getCategoriesAPI } from '../config/api';
 
@@ -145,6 +146,8 @@ const Home: React.FC = () => {
          </div>
       </section>
 
+      <RecommendedProductsSection />
+
       {/* AI Moderation Highlight */}
       <section className="bg-indigo-50 border border-indigo-100 rounded-2xl p-6 flex flex-col md:flex-row items-center gap-6">
         <div className="bg-indigo-600 w-16 h-16 rounded-full flex items-center justify-center flex-shrink-0">
@@ -164,7 +167,7 @@ const Home: React.FC = () => {
       {/* Product List */}
       <section>
          <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-gray-900">Gợi ý dành cho bạn</h2>
+          <h2 className="text-xl font-bold text-gray-900">Sản phẩm mới nhất</h2>
           <span className="text-sm text-gray-400">{loading ? 'Đang tải...' : `Tìm thấy ${products.length} sản phẩm`}</span>
         </div>
         

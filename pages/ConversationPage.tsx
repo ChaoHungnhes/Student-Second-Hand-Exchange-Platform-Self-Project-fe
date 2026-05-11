@@ -22,6 +22,7 @@ import {
   markAsReadAPI,
 } from "../config/api";
 import { getImageUrl } from "../utils/imageHelper";
+import { triggerRefreshUnreadCount } from "../utils/eventBus";
 
 const formatTimeDisplay = (dateString: string) => {
   if (!dateString) return "";
@@ -154,7 +155,7 @@ const ConversationPage: React.FC = () => {
     if (!conversationId) return;
 
     fetchMessages();
-    markAsReadAPI(conversationId);
+    markAsReadAPI(conversationId).finally(() => triggerRefreshUnreadCount());
     connectWS();
 
     if (details?.partnerId) {
@@ -212,6 +213,9 @@ const ConversationPage: React.FC = () => {
         client.subscribe(`/topic/conversations/${conversationId}`, (msg) => {
           const message: Message = JSON.parse(msg.body);
           setMessages((prev) => [...prev, message]);
+          if (String(message.senderId) !== String(user?.id)) {
+            markAsReadAPI(conversationId!).finally(() => triggerRefreshUnreadCount());
+          }
         });
 
         client.subscribe("/user/queue/errors", (msg) => {

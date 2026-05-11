@@ -69,6 +69,7 @@ export interface Product {
   addressDetail?: string;
   latitude?: number;
   longitude?: number;
+  distanceKm?: number | null;
   owner: boolean; // true nếu người xem là chủ bài đăng
   buyerInfo?: BuyerInfo | null; // Thông tin người mua (nếu đã bán)
 }
@@ -161,4 +162,24 @@ export interface Conversation {
   lastMessage: string;
   lastMessageTime: string;
   unreadCount: number;
+}
+
+export interface Notification {
+  id: number;
+  recipientId?: string;
+  recipientName?: string;
+  type: string;
+  title: string;
+  content?: string | null;
+  targetId?: string | null;
+  targetType?: string | null;
+  read?: boolean;
+  isRead?: boolean;
+  readAt?: string | null;
+  createdAt: string;
+}
+
+export interface NotificationResponse {
+  meta: MetaData;
+  result: Notification[];
 }

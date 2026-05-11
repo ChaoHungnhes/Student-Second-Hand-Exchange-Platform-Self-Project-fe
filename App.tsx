@@ -12,6 +12,8 @@ import AllProductsPage from './pages/AllProductsPage';
 import PostProductPage from './pages/PostProductPage';
 import ConversationPage from './pages/ConversationPage';
 import ConversationListPage from './pages/ConversationListPage';
+import NotificationsPage from './pages/NotificationsPage';
+import NotificationDetailPage from './pages/NotificationDetailPage';
 import NearbyProductsPage from './pages/NearbyProductsPage';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -51,6 +53,14 @@ const App: React.FC = () => {
 
               <Route path="/conversations" element={
                 <ProtectedRoute><ConversationListPage /></ProtectedRoute>
+              } />
+
+              <Route path="/notifications" element={
+                <ProtectedRoute><NotificationsPage /></ProtectedRoute>
+              } />
+
+              <Route path="/notifications/:id" element={
+                <ProtectedRoute><NotificationDetailPage /></ProtectedRoute>
               } />
 
               <Route path="/post" element={

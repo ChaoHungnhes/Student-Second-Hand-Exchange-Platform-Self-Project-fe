@@ -37,6 +37,12 @@ export const getNearbyProductsAPI = ({ lat, lng, radius, page = 1, size = 6 }) =
   axios.get("/s2s/products/nearby", {
     params: { lat, lng, radius, page, size }
   });
+
+export const getRecommendedProductsAPI = (page = 1, size = 10) =>
+  axios.get("/s2s/products/recommendations", {
+    params: { page, size }
+  });
+
 export const getProductDetailAPI = (id) => axios.get(`/s2s/products/${id}`);
 
 export const createDraftProductAPI = (data) => 
@@ -112,6 +118,25 @@ export const searchConversationsAPI = (keyword) =>
 
 export const checkUserOnlineAPI = (userId) =>
   axios.get(`/s2s/conversations/users/${userId}/online`);
+
+// ====== API NOTIFICATIONS ======
+export const getNotificationsAPI = ({ page = 1, size = 10, read } = {}) => {
+  const params = { page, size };
+  if (read !== undefined && read !== 'ALL') params.read = read;
+  return axios.get('/s2s/notifications', { params });
+};
+
+export const getNotificationDetailAPI = (id) =>
+  axios.get(`/s2s/notifications/${id}`);
+
+export const markNotificationAsReadAPI = (id) =>
+  axios.patch(`/s2s/notifications/${id}/read`);
+
+export const markAllNotificationsAsReadAPI = () =>
+  axios.patch('/s2s/notifications/read-all');
+
+export const getUnreadNotificationsCountAPI = () =>
+  axios.get('/s2s/notifications/unread-count');
 
 export const createReportAPI = (payload) =>
   axios.post(`/s2s/reports`, payload);
@@ -236,3 +261,25 @@ export const updateConversationStatusAPI = (id, status) =>
 
 export const deleteConversationAPI = (id) =>
   axios.delete(`/s2s/admin/conversations/${id}`);
+
+// ====== ADMIN / NOTIFICATIONS ======
+export const getAdminNotificationsAPI = ({ page = 1, size = 10, recipientId, read, createdFrom, createdTo } = {}) => {
+  const params = { page, size };
+  if (recipientId) params.recipientId = recipientId;
+  if (read !== undefined && read !== 'ALL') params.read = read;
+  if (createdFrom) params.createdFrom = createdFrom;
+  if (createdTo) params.createdTo = createdTo;
+  return axios.get('/s2s/admin/notifications', { params });
+};
+
+export const createAdminNotificationAPI = (data) =>
+  axios.post('/s2s/admin/notifications', data);
+
+export const updateAdminNotificationAPI = (id, data) =>
+  axios.put(`/s2s/admin/notifications/${id}`, data);
+
+export const deleteAdminNotificationAPI = (id) =>
+  axios.delete(`/s2s/admin/notifications/${id}`);
+
+export const getAdminNotificationStatsAPI = () =>
+  axios.get('/s2s/admin/notifications/stats');
