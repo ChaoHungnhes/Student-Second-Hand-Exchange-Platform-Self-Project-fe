@@ -148,6 +148,11 @@ export const getReviewsByUserIdAPI = (userId, page = 1, size = 10) =>
     params: { userId, page, size } 
   });
 
+export const getBuyerReviewsByProductAPI = (productId, page = 1, size = 10) =>
+  axios.get(`/s2s/reviews/product/${productId}/buyer`, {
+    params: { page, size }
+  });
+
 // ====== ADMIN / COUNT HELPERS ======
 export const countPublicProductsAPI = () => axios.get('/s2s/products/count-public');
 export const countActiveUsersAPI = () => axios.get('/s2s/user/count-active');

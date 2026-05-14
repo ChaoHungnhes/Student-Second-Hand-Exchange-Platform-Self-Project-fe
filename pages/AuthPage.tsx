@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 // Import thêm API mới
 import { registerAPI, verifyEmailAPI, forgotPasswordAPI, resetPasswordAPI } from '../config/api';
+import { getApiErrorMessage, showApiErrorAlert } from '../utils/apiError';
 
 type AuthMode = 'login' | 'register' | 'verify' | 'forgot' | 'reset';
 
@@ -61,7 +62,9 @@ const AuthPage: React.FC = () => {
         await login({ email, password });
         navigate('/');
       } catch (err) {
-        setError('Email hoặc mật khẩu không chính xác');
+        const message = getApiErrorMessage(err, 'Email hoặc mật khẩu không chính xác');
+        setError(message);
+        showApiErrorAlert(err, message);
       } finally {
         setLoading(false);
       }
@@ -80,7 +83,9 @@ const AuthPage: React.FC = () => {
         setMode('verify');
         setTimer(300);
       } catch (err) {
-        setError('Đăng ký thất bại. Email có thể đã tồn tại.');
+        const message = getApiErrorMessage(err, 'Đăng ký thất bại. Email có thể đã tồn tại.');
+        setError(message);
+        showApiErrorAlert(err, message);
       } finally {
         setLoading(false);
       }
@@ -99,7 +104,9 @@ const AuthPage: React.FC = () => {
         setMode('reset');
         setTimer(300);
       } catch (err) {
-        setError('Không tìm thấy email này trong hệ thống.');
+        const message = getApiErrorMessage(err, 'Không tìm thấy email này trong hệ thống.');
+        setError(message);
+        showApiErrorAlert(err, message);
       } finally {
         setLoading(false);
       }
@@ -133,7 +140,9 @@ const AuthPage: React.FC = () => {
         }, 1500);
 
       } catch (err) {
-        setError('Mã OTP không đúng hoặc đã hết hạn.');
+        const message = getApiErrorMessage(err, 'Mã OTP không đúng hoặc đã hết hạn.');
+        setError(message);
+        showApiErrorAlert(err, message);
       } finally {
         setLoading(false);
       }
@@ -154,7 +163,9 @@ const AuthPage: React.FC = () => {
         setPassword('');
         setOtp('');
       } catch (err) {
-        setError('Mã xác nhận không chính xác.');
+        const message = getApiErrorMessage(err, 'Mã xác nhận không chính xác.');
+        setError(message);
+        showApiErrorAlert(err, message);
       } finally {
         setLoading(false);
       }

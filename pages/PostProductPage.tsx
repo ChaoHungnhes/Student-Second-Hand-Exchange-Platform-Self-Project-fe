@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+﻿import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import {
@@ -28,6 +28,7 @@ import {
   getCityCenter,
   normalizeCity,
 } from "../components/post-product/locationUtils";
+import { showApiErrorAlert } from "../utils/apiError";
 
 const PostProductPage: React.FC = () => {
   const { user } = useAuth();
@@ -42,7 +43,7 @@ const PostProductPage: React.FC = () => {
   const [isReverseGeocoding, setIsReverseGeocoding] = useState(false);
   const [mapVisible, setMapVisible] = useState(false);
   const [mapCenter, setMapCenter] = useState<[number, number]>(
-    getCityCenter("Hà Nội"),
+    getCityCenter("HÃ  Ná»™i"),
   );
 
   const [formData, setFormData] = useState<PostProductFormData>({
@@ -50,7 +51,7 @@ const PostProductPage: React.FC = () => {
     description: "",
     price: "",
     categoryId: "",
-    city: "Hà Nội",
+    city: "HÃ  Ná»™i",
     ward: "",
     addressDetail: "",
     latitude: "",
@@ -132,7 +133,7 @@ const PostProductPage: React.FC = () => {
   const handleLocateFromWard = async () => {
     if (!canOpenMap) {
       alert(
-        "Vui lòng nhập đủ thành phố và phường/xã trước khi chọn vị trí chi tiết.",
+        "Vui lÃ²ng nháº­p Ä‘á»§ thÃ nh phá»‘ vÃ  phÆ°á»ng/xÃ£ trÆ°á»›c khi chá»n vá»‹ trÃ­ chi tiáº¿t.",
       );
       return;
     }
@@ -148,7 +149,7 @@ const PostProductPage: React.FC = () => {
       const data = res?.data?.data || res?.data || res;
 
       if (!data?.latitude || !data?.longitude) {
-        throw new Error("Không tìm thấy tọa độ");
+        throw new Error("KhÃ´ng tÃ¬m tháº¥y tá»a Ä‘á»™");
       }
 
       const nextCity = normalizeCity(data.city || formData.city);
@@ -168,9 +169,10 @@ const PostProductPage: React.FC = () => {
       setMapCenter(nextPosition);
       setMapVisible(true);
     } catch (error) {
-      console.error("Lỗi định vị từ địa chỉ:", error);
-      alert(
-        "Không tìm thấy khu vực từ thông tin thành phố và phường/xã. Bạn kiểm tra lại tên ward nhé.",
+      console.error("Lá»—i Ä‘á»‹nh vá»‹ tá»« Ä‘á»‹a chá»‰:", error);
+      showApiErrorAlert(
+        error,
+        "KhÃ´ng tÃ¬m tháº¥y khu vá»±c tá»« thÃ´ng tin thÃ nh phá»‘ vÃ  phÆ°á»ng/xÃ£. Báº¡n kiá»ƒm tra láº¡i tÃªn ward nhÃ©.",
       );
     } finally {
       setIsLocating(false);
@@ -195,15 +197,16 @@ const PostProductPage: React.FC = () => {
       }));
       setMapCenter([lat, lng]);
     } catch (error) {
-      console.error("Lỗi lấy địa chỉ từ bản đồ:", error);
+      console.error("Lá»—i láº¥y Ä‘á»‹a chá»‰ tá»« báº£n Ä‘á»“:", error);
       setFormData((prev) => ({
         ...prev,
         latitude: String(lat),
         longitude: String(lng),
       }));
       setMapCenter([lat, lng]);
-      alert(
-        "Đã cập nhật tọa độ, nhưng chưa lấy được địa chỉ chi tiết từ vị trí này.",
+      showApiErrorAlert(
+        error,
+        "ÄÃ£ cáº­p nháº­t tá»a Ä‘á»™, nhÆ°ng chÆ°a láº¥y Ä‘Æ°á»£c Ä‘á»‹a chá»‰ chi tiáº¿t tá»« vá»‹ trÃ­ nÃ y.",
       );
     } finally {
       setIsReverseGeocoding(false);
@@ -214,7 +217,7 @@ const PostProductPage: React.FC = () => {
     e.preventDefault();
 
     if (!formData.latitude || !formData.longitude) {
-      alert("Bạn cần chọn vị trí chi tiết trên bản đồ trước khi tiếp tục.");
+      alert("Báº¡n cáº§n chá»n vá»‹ trÃ­ chi tiáº¿t trÃªn báº£n Ä‘á»“ trÆ°á»›c khi tiáº¿p tá»¥c.");
       return;
     }
 
@@ -235,8 +238,8 @@ const PostProductPage: React.FC = () => {
         setStep("IMAGES");
       }
     } catch (error) {
-      console.error("Lỗi tạo bản nháp:", error);
-      alert("Có lỗi xảy ra khi tạo tin đăng. Vui lòng thử lại.");
+      console.error("Lá»—i táº¡o báº£n nhÃ¡p:", error);
+      showApiErrorAlert(error, "CÃ³ lá»—i xáº£y ra khi táº¡o tin Ä‘Äƒng. Vui lÃ²ng thá»­ láº¡i.");
     } finally {
       setIsLoading(false);
     }
@@ -259,8 +262,8 @@ const PostProductPage: React.FC = () => {
       await submitProductAPI(draftId);
       setStep("SUCCESS");
     } catch (error) {
-      console.error("Lỗi upload/submit:", error);
-      alert("Đăng tin thất bại ở bước cuối. Vui lòng thử lại.");
+      console.error("Lá»—i upload/submit:", error);
+      showApiErrorAlert(error, "ÄÄƒng tin tháº¥t báº¡i á»Ÿ bÆ°á»›c cuá»‘i. Vui lÃ²ng thá»­ láº¡i.");
       setStep("IMAGES");
     }
   };
