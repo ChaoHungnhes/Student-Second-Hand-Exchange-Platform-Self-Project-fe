@@ -43,7 +43,7 @@ const PostProductPage: React.FC = () => {
   const [isReverseGeocoding, setIsReverseGeocoding] = useState(false);
   const [mapVisible, setMapVisible] = useState(false);
   const [mapCenter, setMapCenter] = useState<[number, number]>(
-    getCityCenter("HÃ  Ná»™i"),
+    getCityCenter("Hà Nội"),
   );
 
   const [formData, setFormData] = useState<PostProductFormData>({
@@ -51,7 +51,7 @@ const PostProductPage: React.FC = () => {
     description: "",
     price: "",
     categoryId: "",
-    city: "HÃ  Ná»™i",
+    city: "Hà Nội",
     ward: "",
     addressDetail: "",
     latitude: "",
@@ -133,7 +133,7 @@ const PostProductPage: React.FC = () => {
   const handleLocateFromWard = async () => {
     if (!canOpenMap) {
       alert(
-        "Vui lÃ²ng nháº­p Ä‘á»§ thÃ nh phá»‘ vÃ  phÆ°á»ng/xÃ£ trÆ°á»›c khi chá»n vá»‹ trÃ­ chi tiáº¿t.",
+        "Vui lòng nhập đủ thành phố và phường/xã trước khi chọn vị trí chi tiết.",
       );
       return;
     }
@@ -149,7 +149,7 @@ const PostProductPage: React.FC = () => {
       const data = res?.data?.data || res?.data || res;
 
       if (!data?.latitude || !data?.longitude) {
-        throw new Error("KhÃ´ng tÃ¬m tháº¥y tá»a Ä‘á»™");
+        throw new Error("Không tìm thấy tọa độ");
       }
 
       const nextCity = normalizeCity(data.city || formData.city);
@@ -169,10 +169,10 @@ const PostProductPage: React.FC = () => {
       setMapCenter(nextPosition);
       setMapVisible(true);
     } catch (error) {
-      console.error("Lá»—i Ä‘á»‹nh vá»‹ tá»« Ä‘á»‹a chá»‰:", error);
+      console.error("Lỗi định vị từ địa chỉ:", error);
       showApiErrorAlert(
         error,
-        "KhÃ´ng tÃ¬m tháº¥y khu vá»±c tá»« thÃ´ng tin thÃ nh phá»‘ vÃ  phÆ°á»ng/xÃ£. Báº¡n kiá»ƒm tra láº¡i tÃªn ward nhÃ©.",
+        "Không tìm thấy khu vực từ thông tin thành phố và phường/xã. Bạn kiểm tra lại tên ward nhé.",
       );
     } finally {
       setIsLocating(false);
@@ -197,7 +197,7 @@ const PostProductPage: React.FC = () => {
       }));
       setMapCenter([lat, lng]);
     } catch (error) {
-      console.error("Lá»—i láº¥y Ä‘á»‹a chá»‰ tá»« báº£n Ä‘á»“:", error);
+      console.error("Lỗi lấy địa chỉ từ bản đồ:", error);
       setFormData((prev) => ({
         ...prev,
         latitude: String(lat),
@@ -206,7 +206,7 @@ const PostProductPage: React.FC = () => {
       setMapCenter([lat, lng]);
       showApiErrorAlert(
         error,
-        "ÄÃ£ cáº­p nháº­t tá»a Ä‘á»™, nhÆ°ng chÆ°a láº¥y Ä‘Æ°á»£c Ä‘á»‹a chá»‰ chi tiáº¿t tá»« vá»‹ trÃ­ nÃ y.",
+        "Đã cập nhật tọa độ, nhưng chưa lấy được địa chỉ chi tiết từ vị trí này.",
       );
     } finally {
       setIsReverseGeocoding(false);
@@ -217,7 +217,7 @@ const PostProductPage: React.FC = () => {
     e.preventDefault();
 
     if (!formData.latitude || !formData.longitude) {
-      alert("Báº¡n cáº§n chá»n vá»‹ trÃ­ chi tiáº¿t trÃªn báº£n Ä‘á»“ trÆ°á»›c khi tiáº¿p tá»¥c.");
+      alert("Bạn cần chọn vị trí chi tiết trên bản đồ trước khi tiếp tục.");
       return;
     }
 
@@ -238,8 +238,8 @@ const PostProductPage: React.FC = () => {
         setStep("IMAGES");
       }
     } catch (error) {
-      console.error("Lá»—i táº¡o báº£n nhÃ¡p:", error);
-      showApiErrorAlert(error, "CÃ³ lá»—i xáº£y ra khi táº¡o tin Ä‘Äƒng. Vui lÃ²ng thá»­ láº¡i.");
+      console.error("Lỗi tạo bản nháp:", error);
+      showApiErrorAlert(error, "Có lỗi xảy ra khi tạo tin đăng. Vui lòng thử lại.");
     } finally {
       setIsLoading(false);
     }
@@ -262,8 +262,8 @@ const PostProductPage: React.FC = () => {
       await submitProductAPI(draftId);
       setStep("SUCCESS");
     } catch (error) {
-      console.error("Lá»—i upload/submit:", error);
-      showApiErrorAlert(error, "ÄÄƒng tin tháº¥t báº¡i á»Ÿ bÆ°á»›c cuá»‘i. Vui lÃ²ng thá»­ láº¡i.");
+      console.error("Lỗi upload/submit:", error);
+      showApiErrorAlert(error, "Đăng tin thất bại ở bước cuối. Vui lòng thử lại.");
       setStep("IMAGES");
     }
   };

@@ -1,9 +1,9 @@
-import axios from "axios";
+﻿import axios from "axios";
 import { getApiErrorMessage } from "../utils/apiError";
 
 // Tạo instance axios 
 const instance = axios.create({
-  baseURL: "http://localhost:8089",
+  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:8089",
   withCredentials: true,
   timeout: 15000,
 });
@@ -94,3 +94,4 @@ instance.interceptors.response.use(
 );
 
 export default instance;
+

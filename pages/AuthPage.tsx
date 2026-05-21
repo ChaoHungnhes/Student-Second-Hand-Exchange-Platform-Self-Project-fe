@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 // Import thêm API mới
@@ -6,6 +6,8 @@ import { registerAPI, verifyEmailAPI, forgotPasswordAPI, resetPasswordAPI } from
 import { getApiErrorMessage, showApiErrorAlert } from '../utils/apiError';
 
 type AuthMode = 'login' | 'register' | 'verify' | 'forgot' | 'reset';
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8089';
 
 const AuthPage: React.FC = () => {
   const [mode, setMode] = useState<AuthMode>('login');
@@ -26,6 +28,10 @@ const AuthPage: React.FC = () => {
 
   const { login } = useAuth();
   const navigate = useNavigate();
+
+  const handleGoogleLogin = () => {
+    window.location.href = `${API_BASE_URL}/oauth2/authorization/google`;
+  };
 
   // Đếm ngược thời gian OTP
   useEffect(() => {
@@ -309,7 +315,7 @@ const AuthPage: React.FC = () => {
                 {mode === 'reset' && (
                   <>
                     <div className="space-y-1">
-                      <label htmlFor="new-password" classNa="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Mật khẩu mới</label>
+                      <label htmlFor="new-password" className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Mật khẩu mới</label>
                       <input
                         id="new-password"
                         type="password"
@@ -321,7 +327,7 @@ const AuthPage: React.FC = () => {
                       />
                     </div>
                     <div className="space-y-1">
-                      <label htmlFor="confirm-password" classNa="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Xác nhận mật khẩu</label>
+                      <label htmlFor="confirm-password" className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Xác nhận mật khẩu</label>
                       <input
                         id="confirm-password"
                         type="password"
@@ -355,6 +361,24 @@ const AuthPage: React.FC = () => {
             </button>
           </div>
           
+          {mode === 'login' && (
+            <>
+              <div className="relative flex items-center py-1">
+                <div className="flex-grow border-t border-gray-200"></div>
+                <span className="mx-4 flex-shrink text-[10px] font-black uppercase tracking-widest text-gray-400">hoặc</span>
+                <div className="flex-grow border-t border-gray-200"></div>
+              </div>
+              <button
+                type="button"
+                onClick={handleGoogleLogin}
+                disabled={loading}
+                className="w-full flex items-center justify-center gap-3 py-3.5 px-4 border border-gray-200 rounded-2xl bg-white text-sm font-black text-gray-700 hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300 disabled:opacity-50 transition-all shadow-sm active:scale-95"
+              >
+                <i className="fa-brands fa-google text-lg text-red-500"></i>
+                <span>Đăng nhập bằng Google</span>
+              </button>
+            </>
+          )}
           {(mode === 'forgot' || mode === 'reset' || mode === 'verify') && (
             <button 
               type="button"
@@ -371,3 +395,7 @@ const AuthPage: React.FC = () => {
 };
 
 export default AuthPage;
+
+
+
+

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState, ReactNode } from "react";
+﻿import React, { createContext, useContext, useEffect, useState, ReactNode } from "react";
 // Đảm bảo bạn đã update file types/index.ts như hướng dẫn trước
 import { User, LoginResponse, IntrospectResponse } from "../types/index"; 
 import { loginAPI, logoutAPI, introspectAPI, getMyInfoAPI, updateProfileAPI } from "../config/api";
@@ -10,6 +10,7 @@ interface AuthContextType {
   logout: () => Promise<void>;
   isAuthenticated: boolean;
   updateUserProfile: (name: string) => Promise<void>;
+  refreshCurrentUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -101,16 +102,20 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setUser(null);
   };
 
+  const refreshCurrentUser = async () => {
+    const fullUserInfo = await getMyInfoAPI();
+    const userData = parseUser(fullUserInfo);
+    setUser(userData);
+    localStorage.setItem("auth_user", JSON.stringify(userData));
+  };
+
   // --- 2. HÀM LOGIN ---
   const login = async ({ email, password }: any) => {
     const res = await loginAPI({ email, password }) as unknown as LoginResponse;
     
     if (res && res.authenticated) {
       try {
-        const fullUserInfo = await getMyInfoAPI();
-        const userData = parseUser(fullUserInfo);
-        setUser(userData);
-        localStorage.setItem("auth_user", JSON.stringify(userData));
+        await refreshCurrentUser();
         
       } catch (error) {
         console.warn("Không lấy được full info sau login, dùng tạm info cơ bản");
@@ -152,7 +157,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, isAuthenticated: !!user, updateUserProfile }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, isAuthenticated: !!user, updateUserProfile, refreshCurrentUser }}>
       {children}
     </AuthContext.Provider>
   );
@@ -165,3 +170,4 @@ export const useAuth = () => {
   }
   return context;
 };
+

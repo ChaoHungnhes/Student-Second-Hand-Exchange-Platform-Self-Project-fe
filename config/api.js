@@ -1,4 +1,4 @@
-// src/config/api.js
+﻿// src/config/api.js
 import axios from "./axios-customize";
 
 // API Auth
@@ -95,6 +95,11 @@ export const confirmTransactionAPI = (conversationId) =>
 export const getTransactionByProductAPI = (productId) => 
   axios.get(`/s2s/transactions/product/${productId}`);
 ;
+
+
+// ====== API CHATBOT ======
+export const chatBotAPI = (message) =>
+  axios.get(`/s2s/chatBot?message=${encodeURIComponent(message)}`);
 
 // ====== API CHAT (CONVERSATION) ======
 
@@ -242,12 +247,12 @@ export const deleteAdminProductAPI = (id) => {
     return axios.delete(`/s2s/products/admin/${id}`);
 };
 
-// APPROVE (Duyệt) - Body: { adminNote, version }
+// APPROVE (Duyá»‡t) - Body: { adminNote, version }
 export const approveProductAPI = (id, data) => {
     return axios.post(`/s2s/products/${id}/approve`, data);
 };
 
-// REJECT (Từ chối) - Body: { adminNote, version }
+// REJECT (Tá»« chá»‘i) - Body: { adminNote, version }
 export const rejectProductAPI = (id, data) => {
     return axios.post(`/s2s/products/${id}/reject`, data);
 };
@@ -288,3 +293,5 @@ export const deleteAdminNotificationAPI = (id) =>
 
 export const getAdminNotificationStatsAPI = () =>
   axios.get('/s2s/admin/notifications/stats');
+
+
