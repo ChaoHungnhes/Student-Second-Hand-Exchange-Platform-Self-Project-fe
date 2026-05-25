@@ -3,6 +3,7 @@ import React from "react";
 interface ChatInputProps {
   chatClosed: boolean;
   connected: boolean;
+  canSendMessage: boolean;
   input: string;
   onInputChange: (value: string) => void;
   onSend: () => void;
@@ -11,33 +12,45 @@ interface ChatInputProps {
 const ChatInput: React.FC<ChatInputProps> = ({
   chatClosed,
   connected,
+  canSendMessage,
   input,
   onInputChange,
   onSend,
 }) => (
-  <div className="p-4 bg-white flex items-center gap-3 border-t border-gray-100">
-    <button className="text-gray-400 hover:text-indigo-600 p-2 transition-colors">
-      <i className="fa-solid fa-circle-plus text-xl"></i>
-    </button>
+  <div className="border-t border-slate-100 bg-white/95 p-3 backdrop-blur-md sm:p-4">
+    <div className="flex items-center gap-3 rounded-[1.75rem] border border-slate-200 bg-slate-50 p-2 shadow-inner">
+      <button
+        type="button"
+        className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl text-slate-400 transition-colors hover:bg-white hover:text-teal-600"
+        aria-label="Thêm nội dung"
+      >
+        <i className="fa-solid fa-circle-plus text-xl"></i>
+      </button>
 
-    <div className="flex-1 relative">
       <input
         value={input}
         onChange={(e) => onInputChange(e.target.value)}
         onKeyDown={(e) => e.key === "Enter" && onSend()}
-        disabled={chatClosed}
-        placeholder={chatClosed ? "Giao dịch đã đóng" : "Nhập tin nhắn..."}
-        className="w-full bg-gray-100 border-none rounded-2xl px-5 py-3 text-sm focus:ring-2 focus:ring-indigo-500 transition-all outline-none"
+        disabled={chatClosed || !canSendMessage}
+        placeholder={
+          chatClosed
+            ? "Giao dịch đã đóng"
+            : canSendMessage
+              ? "Nhập tin nhắn..."
+              : "Chỉ người mua hoặc bán mới được nhắn tin"
+        }
+        className="min-w-0 flex-1 bg-transparent px-1 py-3 text-sm font-semibold text-slate-700 outline-none placeholder:text-slate-400 disabled:cursor-not-allowed"
       />
-    </div>
 
-    <button
-      onClick={onSend}
-      disabled={!input.trim() || !connected || chatClosed}
-      className="bg-indigo-600 text-white w-12 h-12 rounded-2xl flex items-center justify-center hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-indigo-100 transition-all active:scale-95"
-    >
-      <i className="fa-solid fa-paper-plane"></i>
-    </button>
+      <button
+        onClick={onSend}
+        disabled={!input.trim() || !connected || chatClosed || !canSendMessage}
+        className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-slate-950 text-white shadow-lg shadow-slate-900/10 transition-all hover:-translate-y-0.5 hover:bg-teal-700 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0"
+        aria-label="Gửi tin nhắn"
+      >
+        <i className="fa-solid fa-paper-plane"></i>
+      </button>
+    </div>
   </div>
 );
 

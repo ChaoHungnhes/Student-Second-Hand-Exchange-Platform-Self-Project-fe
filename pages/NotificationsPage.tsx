@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+﻿import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getNotificationsAPI, markAllNotificationsAsReadAPI } from "../config/api";
 import type { MetaData, Notification, NotificationResponse } from "../types/index";
@@ -8,28 +8,17 @@ const DEFAULT_META: MetaData = { page: 1, pageSize: 10, pages: 1, total: 0 };
 
 const normalizeNotificationsResponse = (response: any): NotificationResponse => {
   if (response?.result && Array.isArray(response.result)) {
-    return {
-      meta: response.meta || DEFAULT_META,
-      result: response.result,
-    };
+    return { meta: response.meta || DEFAULT_META, result: response.result };
   }
 
   if (Array.isArray(response)) {
     return {
-      meta: {
-        page: 1,
-        pageSize: response.length,
-        pages: 1,
-        total: response.length,
-      },
+      meta: { page: 1, pageSize: response.length, pages: 1, total: response.length },
       result: response,
     };
   }
 
-  return {
-    meta: DEFAULT_META,
-    result: [],
-  };
+  return { meta: DEFAULT_META, result: [] };
 };
 
 const isNotificationRead = (notification: Notification) =>
@@ -48,13 +37,11 @@ const formatDateTime = (value?: string) => {
 
 const getNotificationIcon = (type?: string) => {
   const normalized = (type || "").toUpperCase();
-
   if (normalized.includes("PRODUCT")) return "fa-box-open";
   if (normalized.includes("TRANSACTION")) return "fa-handshake";
   if (normalized.includes("REPORT")) return "fa-triangle-exclamation";
   if (normalized.includes("REVIEW")) return "fa-star";
   if (normalized.includes("CHAT") || normalized.includes("MESSAGE")) return "fa-comment-dots";
-
   return "fa-bell";
 };
 
@@ -67,14 +54,13 @@ const NotificationsPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [markingAll, setMarkingAll] = useState(false);
 
+  const unreadCount = notifications.filter((item) => !isNotificationRead(item)).length;
+  const readCount = notifications.length - unreadCount;
+
   const fetchNotifications = async () => {
     setLoading(true);
     try {
-      const response = await getNotificationsAPI({
-        page: currentPage,
-        size: 10,
-        read: readFilter,
-      });
+      const response = await getNotificationsAPI({ page: currentPage, size: 10, read: readFilter });
       const normalized = normalizeNotificationsResponse(response);
       setNotifications(normalized.result);
       setMeta(normalized.meta || DEFAULT_META);
@@ -106,12 +92,10 @@ const NotificationsPage: React.FC = () => {
           read: true,
           isRead: true,
           readAt: notification.readAt || new Date().toISOString(),
-        })),
+        }))
       );
       triggerRefreshNotificationUnreadCount();
-      if (readFilter === "false") {
-        fetchNotifications();
-      }
+      if (readFilter === "false") fetchNotifications();
     } catch (error) {
       console.error("Lỗi đánh dấu đọc tất cả thông báo:", error);
       alert("Không thể đánh dấu đọc tất cả thông báo lúc này.");
@@ -121,166 +105,184 @@ const NotificationsPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto py-8 px-4 pb-24">
-      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-5 mb-8">
-        <div>
-          <button
-            type="button"
-            onClick={() => navigate(-1)}
-            className="mb-5 inline-flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-indigo-600 transition-colors"
-          >
-            <i className="fa-solid fa-arrow-left"></i>
-            Quay lại
-          </button>
-          <h1 className="text-3xl font-black text-gray-900 flex items-center gap-3">
-            <i className="fa-solid fa-bell text-indigo-600"></i>
-            Thông báo
-          </h1>
-          <p className="mt-2 text-sm text-gray-500">
-            Theo dõi các cập nhật về sản phẩm, giao dịch, báo cáo và tin nhắn của bạn.
-          </p>
-        </div>
+    <div className="relative -mx-4 -mt-8 overflow-hidden bg-[radial-gradient(circle_at_top_left,rgba(153,246,228,0.34),transparent_34%),linear-gradient(180deg,#f8fafc_0%,#ffffff_38%,#f8fafc_100%)] px-4 pb-24 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
+      <div className="pointer-events-none absolute right-0 top-16 h-72 w-72 rounded-full bg-amber-200/30 blur-3xl"></div>
+      <div className="pointer-events-none absolute -left-24 top-[430px] h-80 w-80 rounded-full bg-teal-200/30 blur-3xl"></div>
 
-        <div className="flex flex-col sm:flex-row gap-3 self-start md:self-auto">
-          <div className="flex bg-gray-100 p-1 rounded-2xl">
-          {[
-            { value: "ALL", label: "Tất cả" },
-            { value: "false", label: "Chưa đọc" },
-            { value: "true", label: "Đã đọc" },
-          ].map((item) => (
-            <button
-              key={item.value}
-              type="button"
-              onClick={() => handleFilterChange(item.value as "ALL" | "false" | "true")}
-              className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${
-                readFilter === item.value
-                  ? "bg-white text-indigo-600 shadow-sm"
-                  : "text-gray-500 hover:text-gray-700"
-              }`}
-            >
-              {item.label}
-            </button>
-          ))}
+      <div className="relative mx-auto max-w-5xl space-y-8 pt-8">
+        <section className="overflow-hidden rounded-[2.5rem] bg-slate-950 text-white shadow-[0_28px_80px_rgba(15,23,42,0.22)]">
+          <div className="relative grid gap-6 p-6 sm:p-8 lg:grid-cols-[1.1fr_0.9fr] lg:p-10">
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_15%,rgba(45,212,191,0.28),transparent_28%),radial-gradient(circle_at_88%_22%,rgba(251,191,36,0.16),transparent_24%)]"></div>
+
+            <div className="relative z-10">
+              <button
+                type="button"
+                onClick={() => navigate(-1)}
+                className="mb-5 inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/10 px-4 py-2 text-sm font-black text-slate-200 transition-all hover:-translate-y-0.5 hover:bg-white/20"
+              >
+                <i className="fa-solid fa-arrow-left"></i>
+                Quay lại
+              </button>
+              <span className="inline-flex rounded-full bg-gradient-to-r from-teal-300 to-emerald-300 px-4 py-2 text-xs font-black uppercase tracking-[0.22em] text-slate-950">
+                Notification hub
+              </span>
+              <h1 className="mt-5 text-4xl font-black leading-tight tracking-tight sm:text-5xl">
+                Bảng tin cập nhật cho mọi giao dịch.
+              </h1>
+              <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-300 sm:text-base">
+                Theo dõi tin nhắn, sản phẩm, giao dịch, đánh giá và các nhắc nhở quan trọng trong UniTrade.
+              </p>
+            </div>
+
+            <div className="relative z-10 grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
+              {[
+                { label: "Tổng", value: meta.total, icon: "fa-bell" },
+                { label: "Chưa đọc", value: unreadCount, icon: "fa-envelope" },
+                { label: "Đã đọc", value: readCount, icon: "fa-envelope-open" },
+              ].map((item) => (
+                <div key={item.label} className="rounded-3xl border border-white/10 bg-white/10 p-4 backdrop-blur-md">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-[0.18em] text-teal-200">{item.label}</p>
+                      <p className="mt-2 text-3xl font-black">{item.value}</p>
+                    </div>
+                    <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-slate-950">
+                      <i className={`fa-solid ${item.icon}`}></i>
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
+        </section>
 
-          <button
-            type="button"
-            onClick={handleMarkAllAsRead}
-            disabled={markingAll || notifications.every(isNotificationRead)}
-            className="px-4 py-2 rounded-2xl bg-indigo-600 text-white text-xs font-black uppercase tracking-wider hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-          >
-            {markingAll ? (
-              <i className="fa-solid fa-circle-notch animate-spin"></i>
-            ) : (
-              "Đọc tất cả"
-            )}
-          </button>
-        </div>
-      </div>
+        <section className="rounded-[2rem] border border-slate-200 bg-white/90 p-4 shadow-xl shadow-slate-900/5 backdrop-blur-md sm:p-5">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.22em] text-teal-600">Bộ lọc thông báo</p>
+              <h2 className="mt-1 text-2xl font-black tracking-tight text-slate-950">Chọn trạng thái cần xem</h2>
+            </div>
 
-      <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
-        {loading ? (
-          <div className="p-16 text-center">
-            <i className="fa-solid fa-circle-notch animate-spin text-3xl text-indigo-600"></i>
-            <p className="mt-3 text-xs text-gray-400 font-bold uppercase tracking-widest">Đang tải...</p>
-          </div>
-        ) : notifications.length > 0 ? (
-          <div className="divide-y divide-gray-50">
-            {notifications.map((notification) => {
-              const isRead = isNotificationRead(notification);
-
-              return (
-                <button
-                  key={notification.id}
-                  type="button"
-                  onClick={() => navigate(`/notifications/${notification.id}`, { state: { notification } })}
-                  className={`w-full text-left p-5 sm:p-6 flex gap-4 hover:bg-indigo-50/40 transition-all ${
-                    isRead ? "bg-white" : "bg-indigo-50/25"
-                  }`}
-                >
-                  <div
-                    className={`w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 ${
-                      isRead ? "bg-gray-100 text-gray-400" : "bg-indigo-600 text-white shadow-lg shadow-indigo-100"
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <div className="grid grid-cols-3 gap-1.5 rounded-3xl bg-slate-100 p-1.5">
+                {[
+                  { value: "ALL", label: "Tất cả" },
+                  { value: "false", label: "Chưa đọc" },
+                  { value: "true", label: "Đã đọc" },
+                ].map((item) => (
+                  <button
+                    key={item.value}
+                    type="button"
+                    onClick={() => handleFilterChange(item.value as "ALL" | "false" | "true")}
+                    className={`rounded-2xl px-4 py-2.5 text-xs font-black uppercase tracking-[0.12em] transition-all ${
+                      readFilter === item.value ? "bg-slate-950 text-white shadow-lg" : "text-slate-500 hover:bg-white hover:text-slate-950"
                     }`}
                   >
-                    <i className={`fa-solid ${getNotificationIcon(notification.type)}`}></i>
-                  </div>
+                    {item.label}
+                  </button>
+                ))}
+              </div>
 
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-3">
-                      <h2 className={`text-sm sm:text-base truncate ${isRead ? "font-bold text-gray-700" : "font-black text-gray-900"}`}>
-                        {notification.title}
-                      </h2>
-                      {!isRead && (
-                        <span
-                          aria-label="Thông báo chưa đọc"
-                          className="w-2.5 h-2.5 rounded-full bg-red-500 flex-shrink-0 mt-2 shadow-[0_0_0_4px_rgba(239,68,68,0.12)]"
-                        ></span>
-                      )}
-                    </div>
-
-                    <p className="mt-1 text-sm text-gray-500 line-clamp-2">
-                      {notification.content || "Không có nội dung chi tiết."}
-                    </p>
-
-                    <div className="mt-3 flex flex-wrap items-center gap-2 text-[10px] font-black uppercase tracking-wider">
-                      <span className="px-2.5 py-1 rounded-full bg-gray-100 text-gray-500">
-                        {notification.type}
-                      </span>
-                      {notification.targetType && (
-                        <span className="px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-600">
-                          {notification.targetType}
-                        </span>
-                      )}
-                      <span className="text-gray-400">
-                        {formatDateTime(notification.createdAt)}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="self-center text-gray-200">
-                    <i className="fa-solid fa-chevron-right text-xs"></i>
-                  </div>
-                </button>
-              );
-            })}
+              <button
+                type="button"
+                onClick={handleMarkAllAsRead}
+                disabled={markingAll || notifications.every(isNotificationRead)}
+                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-teal-500 px-5 py-3 text-xs font-black uppercase tracking-[0.12em] text-white shadow-lg shadow-teal-500/20 transition-all hover:-translate-y-0.5 hover:bg-teal-600 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0"
+              >
+                {markingAll ? <i className="fa-solid fa-circle-notch animate-spin"></i> : <i className="fa-solid fa-check-double"></i>}
+                Đọc tất cả
+              </button>
+            </div>
           </div>
-        ) : (
-          <div className="py-24 text-center">
-            <i className="fa-regular fa-bell-slash text-5xl text-gray-200"></i>
-            <h2 className="mt-5 text-lg font-black text-gray-900">Chưa có thông báo</h2>
-            <p className="mt-2 text-sm text-gray-500">
-              Khi có cập nhật mới, thông báo sẽ xuất hiện ở đây.
-            </p>
+        </section>
+
+        <section className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-xl shadow-slate-900/5">
+          {loading ? (
+            <div className="p-20 text-center">
+              <i className="fa-solid fa-circle-notch animate-spin text-4xl text-teal-500"></i>
+              <p className="mt-4 text-xs font-black uppercase tracking-[0.22em] text-slate-400">Đang tải...</p>
+            </div>
+          ) : notifications.length > 0 ? (
+            <div className="divide-y divide-slate-100">
+              {notifications.map((notification) => {
+                const isRead = isNotificationRead(notification);
+
+                return (
+                  <button
+                    key={notification.id}
+                    type="button"
+                    onClick={() => navigate(`/notifications/${notification.id}`, { state: { notification } })}
+                    className={`group flex w-full gap-4 p-4 text-left transition-all hover:bg-teal-50/70 sm:p-6 ${isRead ? "bg-white" : "bg-teal-50/40"}`}
+                  >
+                    <div className={`flex h-13 w-13 flex-shrink-0 items-center justify-center rounded-2xl shadow-sm ${isRead ? "bg-slate-100 text-slate-400" : "bg-slate-950 text-white shadow-slate-900/10"}`}>
+                      <i className={`fa-solid ${getNotificationIcon(notification.type)}`}></i>
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-start justify-between gap-3">
+                        <h2 className={`truncate text-sm sm:text-base ${isRead ? "font-bold text-slate-700" : "font-black text-slate-950"}`}>
+                          {notification.title}
+                        </h2>
+                        {!isRead && (
+                          <span aria-label="Thông báo chưa đọc" className="mt-2 h-2.5 w-2.5 flex-shrink-0 rounded-full bg-red-500 shadow-[0_0_0_4px_rgba(239,68,68,0.12)]"></span>
+                        )}
+                      </div>
+
+                      <p className="mt-1 line-clamp-2 text-sm leading-6 text-slate-500">
+                        {notification.content || "Không có nội dung chi tiết."}
+                      </p>
+
+                      <div className="mt-3 flex flex-wrap items-center gap-2 text-[10px] font-black uppercase tracking-[0.12em]">
+                        <span className="rounded-full bg-slate-100 px-3 py-1.5 text-slate-500">{notification.type}</span>
+                        {notification.targetType && (
+                          <span className="rounded-full bg-teal-50 px-3 py-1.5 text-teal-700">{notification.targetType}</span>
+                        )}
+                        <span className="text-slate-400">{formatDateTime(notification.createdAt)}</span>
+                      </div>
+                    </div>
+
+                    <i className="fa-solid fa-chevron-right self-center text-xs text-slate-200 transition-all group-hover:translate-x-1 group-hover:text-teal-500"></i>
+                  </button>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="py-24 text-center">
+              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-3xl bg-slate-50 text-slate-200">
+                <i className="fa-regular fa-bell-slash text-4xl"></i>
+              </div>
+              <h2 className="mt-5 text-lg font-black text-slate-950">Chưa có thông báo</h2>
+              <p className="mt-2 text-sm text-slate-500">Khi có cập nhật mới, thông báo sẽ xuất hiện ở đây.</p>
+            </div>
+          )}
+        </section>
+
+        {!loading && meta.pages > 1 && (
+          <div className="flex items-center justify-center gap-3 pt-2">
+            <button
+              type="button"
+              onClick={() => setCurrentPage((page) => Math.max(page - 1, 1))}
+              disabled={currentPage === 1}
+              className="flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-600 shadow-sm transition-all hover:-translate-y-0.5 hover:border-teal-300 hover:text-teal-700 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:translate-y-0"
+            >
+              <i className="fa-solid fa-chevron-left"></i>
+            </button>
+
+            <span className="rounded-full bg-white px-4 py-2 text-sm font-black text-slate-500 shadow-sm">
+              Trang {currentPage}/{meta.pages}
+            </span>
+
+            <button
+              type="button"
+              onClick={() => setCurrentPage((page) => Math.min(page + 1, meta.pages))}
+              disabled={currentPage === meta.pages}
+              className="flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-600 shadow-sm transition-all hover:-translate-y-0.5 hover:border-teal-300 hover:text-teal-700 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:translate-y-0"
+            >
+              <i className="fa-solid fa-chevron-right"></i>
+            </button>
           </div>
         )}
       </div>
-
-      {!loading && meta.pages > 1 && (
-        <div className="mt-8 flex items-center justify-center gap-3">
-          <button
-            type="button"
-            onClick={() => setCurrentPage((page) => Math.max(page - 1, 1))}
-            disabled={currentPage === 1}
-            className="w-11 h-11 rounded-2xl border border-gray-200 bg-white text-gray-600 disabled:opacity-30"
-          >
-            <i className="fa-solid fa-chevron-left"></i>
-          </button>
-
-          <span className="text-sm font-bold text-gray-500">
-            Trang {currentPage}/{meta.pages}
-          </span>
-
-          <button
-            type="button"
-            onClick={() => setCurrentPage((page) => Math.min(page + 1, meta.pages))}
-            disabled={currentPage === meta.pages}
-            className="w-11 h-11 rounded-2xl border border-gray-200 bg-white text-gray-600 disabled:opacity-30"
-          >
-            <i className="fa-solid fa-chevron-right"></i>
-          </button>
-        </div>
-      )}
     </div>
   );
 };

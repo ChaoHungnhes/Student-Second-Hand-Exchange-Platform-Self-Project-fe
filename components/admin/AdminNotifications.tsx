@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+﻿import React, { useEffect, useState } from "react";
 import {
   createAdminNotificationAPI,
   deleteAdminNotificationAPI,
@@ -59,13 +59,13 @@ const normalizeNotificationsResponse = (response: any) => ({
 
 const getTargetTone = (targetType?: string | null) => {
   const normalized = (targetType || "").toUpperCase();
-  if (normalized === "PRODUCT") return "bg-blue-50 text-blue-700 border-blue-100";
-  if (normalized === "CONVERSATION") return "bg-cyan-50 text-cyan-700 border-cyan-100";
-  if (normalized === "REPORT") return "bg-red-50 text-red-700 border-red-100";
-  if (normalized === "SYSTEM") return "bg-indigo-50 text-indigo-700 border-indigo-100";
-  if (normalized === "USER") return "bg-violet-50 text-violet-700 border-violet-100";
-  if (normalized === "TRANSACTION") return "bg-emerald-50 text-emerald-700 border-emerald-100";
-  return "bg-gray-50 text-gray-600 border-gray-100";
+  if (normalized === "PRODUCT") return "bg-sky-100 text-sky-700 border-sky-200";
+  if (normalized === "CONVERSATION") return "bg-cyan-100 text-cyan-700 border-cyan-200";
+  if (normalized === "REPORT") return "bg-rose-100 text-rose-700 border-rose-200";
+  if (normalized === "SYSTEM") return "bg-slate-900 text-white border-slate-800";
+  if (normalized === "USER") return "bg-amber-100 text-amber-700 border-amber-200";
+  if (normalized === "TRANSACTION") return "bg-emerald-100 text-emerald-700 border-emerald-200";
+  return "bg-slate-100 text-slate-600 border-slate-200";
 };
 
 const AdminNotifications: React.FC = () => {
@@ -237,47 +237,68 @@ const AdminNotifications: React.FC = () => {
     }
   };
 
+  const readRate = stats.totalCount ? Math.round((stats.readCount / stats.totalCount) * 100) : 0;
   const statsCards = [
-    { label: "Tổng thông báo", value: stats.totalCount, icon: "fa-bell", tone: "text-indigo-600 bg-indigo-50" },
-    { label: "Đã đọc", value: stats.readCount, icon: "fa-envelope-open", tone: "text-emerald-600 bg-emerald-50" },
-    { label: "Chưa đọc", value: stats.unreadCount, icon: "fa-envelope", tone: "text-red-600 bg-red-50" },
+    { label: "Tổng thông báo", value: stats.totalCount, icon: "fa-bell", tone: "from-slate-900 to-slate-700", helper: "Tất cả chiến dịch" },
+    { label: "Đã đọc", value: stats.readCount, icon: "fa-envelope-open-text", tone: "from-emerald-500 to-teal-600", helper: `${readRate}% tương tác` },
+    { label: "Chưa đọc", value: stats.unreadCount, icon: "fa-bolt", tone: "from-orange-500 to-rose-500", helper: "Cần tối ưu tiêu đề" },
   ];
 
   return (
-    <div className="space-y-8 animate-in slide-in-from-right-4 duration-500">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-black text-gray-900 tracking-tight">Quản lý thông báo</h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Tạo, lọc, cập nhật và xóa thông báo gửi đến người dùng.
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={() => setIsCreateOpen(true)}
-          className="bg-indigo-600 text-white px-6 py-4 rounded-3xl font-black text-xs uppercase tracking-widest shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all flex items-center justify-center gap-3"
-        >
-          <i className="fa-solid fa-paper-plane"></i>
-          Tạo thông báo
-        </button>
-      </div>
+    <div className="relative space-y-8 animate-in slide-in-from-bottom-3 duration-500">
+      <div className="absolute -top-10 left-6 -z-10 h-72 w-72 rounded-full bg-orange-200/40 blur-3xl"></div>
+      <div className="absolute top-40 right-0 -z-10 h-80 w-80 rounded-full bg-emerald-200/35 blur-3xl"></div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <section className="overflow-hidden rounded-[38px] border border-white/70 bg-[#f8f3e8] shadow-2xl shadow-stone-100">
+        <div className="grid gap-0 lg:grid-cols-[1.35fr_0.65fr]">
+          <div className="relative p-7 md:p-9">
+            <div className="absolute right-8 top-8 hidden h-28 w-28 rounded-full border-[18px] border-orange-200/70 md:block"></div>
+            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-stone-200 bg-white/70 px-4 py-2 text-[10px] font-black uppercase tracking-[0.24em] text-stone-600">
+              <span className="h-2 w-2 rounded-full bg-orange-500 shadow-[0_0_16px_rgba(249,115,22,0.9)]"></span>
+              Broadcast studio
+            </div>
+            <h1 className="max-w-3xl text-4xl font-black tracking-tight text-stone-950 md:text-5xl">Quản lý thông báo</h1>
+            <p className="mt-3 max-w-2xl text-sm font-semibold leading-6 text-stone-500">Soạn, lọc và chăm sóc các thông báo gửi đến người dùng bằng giao diện sáng, rõ ràng và dễ thao tác hơn.</p>
+            <button
+              type="button"
+              onClick={() => setIsCreateOpen(true)}
+              className="mt-7 inline-flex items-center gap-3 rounded-3xl bg-stone-950 px-7 py-4 text-xs font-black uppercase tracking-widest text-white shadow-xl shadow-stone-300 transition hover:-translate-y-0.5 hover:bg-black"
+            >
+              <i className="fa-solid fa-paper-plane"></i>
+              Tạo thông báo
+            </button>
+          </div>
+          <div className="bg-stone-950 p-7 text-white md:p-9">
+            <p className="text-[10px] font-black uppercase tracking-[0.24em] text-orange-200">Tỷ lệ đã đọc</p>
+            <div className="mt-6 flex items-end gap-3">
+              <span className="text-6xl font-black tracking-tighter">{statsLoading ? "--" : readRate}</span>
+              <span className="mb-2 text-2xl font-black text-orange-200">%</span>
+            </div>
+            <div className="mt-6 h-3 overflow-hidden rounded-full bg-white/10">
+              <div className="h-full rounded-full bg-gradient-to-r from-orange-400 to-emerald-300 transition-all" style={{ width: `${readRate}%` }}></div>
+            </div>
+            <p className="mt-5 text-sm font-medium leading-6 text-stone-300">Theo dõi nhanh mức độ người dùng đã mở thông báo để điều chỉnh nội dung phù hợp.</p>
+          </div>
+        </div>
+      </section>
+
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         {statsCards.map((card) => (
-          <div key={card.label} className="bg-white rounded-[32px] border border-gray-100 shadow-sm p-6 flex items-center gap-4">
-            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${card.tone}`}>
+          <div key={card.label} className="group overflow-hidden rounded-[32px] border border-white bg-white p-5 shadow-xl shadow-stone-100 transition hover:-translate-y-1">
+            <div className={`mb-5 flex h-14 w-14 items-center justify-center rounded-3xl bg-gradient-to-br ${card.tone} text-white shadow-lg`}>
               <i className={`fa-solid ${card.icon}`}></i>
             </div>
-            <div>
-              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{card.label}</p>
-              <p className="text-2xl font-black text-gray-900">{statsLoading ? "..." : card.value}</p>
+            <p className="text-[10px] font-black uppercase tracking-widest text-stone-400">{card.label}</p>
+            <div className="mt-1 flex items-end justify-between gap-3">
+              <p className="text-3xl font-black text-stone-950">{statsLoading ? "..." : card.value}</p>
+              <p className="text-[10px] font-bold text-stone-400">{card.helper}</p>
             </div>
           </div>
         ))}
       </div>
 
-      <div className="bg-white p-6 rounded-[32px] border border-gray-100 shadow-sm">
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
+      <div className="rounded-[34px] border border-white bg-white/85 p-5 shadow-xl shadow-stone-100 backdrop-blur">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-5">
           <input
             type="text"
             placeholder="ID người nhận..."
@@ -286,7 +307,7 @@ const AdminNotifications: React.FC = () => {
               setRecipientId(event.target.value);
               setCurrentPage(1);
             }}
-            className="px-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="rounded-3xl border border-stone-200 bg-stone-50 px-5 py-4 text-sm font-bold text-stone-700 outline-none transition focus:border-orange-400 focus:bg-white focus:ring-4 focus:ring-orange-100"
           />
           <select
             value={readFilter}
@@ -294,311 +315,102 @@ const AdminNotifications: React.FC = () => {
               setReadFilter(event.target.value as "ALL" | "false" | "true");
               setCurrentPage(1);
             }}
-            className="px-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="rounded-3xl border border-stone-200 bg-stone-50 px-5 py-4 text-sm font-black text-stone-700 outline-none transition focus:border-orange-400 focus:ring-4 focus:ring-orange-100"
             aria-label="Lọc theo trạng thái đọc"
           >
             <option value="ALL">Tất cả trạng thái</option>
             <option value="false">Chưa đọc</option>
             <option value="true">Đã đọc</option>
           </select>
-          <input
-            type="datetime-local"
-            value={createdFrom}
-            onChange={(event) => {
-              setCreatedFrom(event.target.value);
-              setCurrentPage(1);
-            }}
-            className="px-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            aria-label="Từ ngày"
-          />
-          <input
-            type="datetime-local"
-            value={createdTo}
-            onChange={(event) => {
-              setCreatedTo(event.target.value);
-              setCurrentPage(1);
-            }}
-            className="px-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            aria-label="Đến ngày"
-          />
-          <button
-            type="button"
-            onClick={resetFilters}
-            className="px-4 py-3 rounded-2xl border border-gray-200 text-gray-600 text-xs font-black uppercase tracking-widest hover:bg-gray-50 transition-colors"
-          >
-            Xóa bộ lọc
-          </button>
+          <input type="datetime-local" value={createdFrom} onChange={(event) => { setCreatedFrom(event.target.value); setCurrentPage(1); }} className="rounded-3xl border border-stone-200 bg-stone-50 px-5 py-4 text-sm font-bold text-stone-700 outline-none transition focus:border-orange-400 focus:ring-4 focus:ring-orange-100" aria-label="Từ ngày" />
+          <input type="datetime-local" value={createdTo} onChange={(event) => { setCreatedTo(event.target.value); setCurrentPage(1); }} className="rounded-3xl border border-stone-200 bg-stone-50 px-5 py-4 text-sm font-bold text-stone-700 outline-none transition focus:border-orange-400 focus:ring-4 focus:ring-orange-100" aria-label="Đến ngày" />
+          <button type="button" onClick={resetFilters} className="rounded-3xl border border-stone-200 px-5 py-4 text-xs font-black uppercase tracking-widest text-stone-500 transition hover:bg-stone-50">Xóa bộ lọc</button>
         </div>
       </div>
 
-      <div className="bg-white rounded-[40px] border border-gray-100 overflow-hidden shadow-sm overflow-x-auto">
-        <table className="w-full min-w-[1120px] table-fixed text-left">
-          <colgroup>
-            <col className="w-[19%]" />
-            <col className="w-[31%]" />
-            <col className="w-[16%]" />
-            <col className="w-[12%]" />
-            <col className="w-[14%]" />
-            <col className="w-[8%]" />
-          </colgroup>
-          <thead className="bg-gray-50 border-b border-gray-100">
-            <tr>
-              <th className="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Người nhận</th>
-              <th className="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Nội dung</th>
-              <th className="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Đối tượng</th>
-              <th className="px-6 py-5 text-center text-[10px] font-black text-gray-400 uppercase tracking-widest">Trạng thái</th>
-              <th className="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Thời gian</th>
-              <th className="px-6 py-5 text-center text-[10px] font-black text-gray-400 uppercase tracking-widest">Thao tác</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-50">
-            {loading ? (
+      <div className="overflow-hidden rounded-[38px] border border-stone-100 bg-white shadow-xl shadow-stone-100">
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[1180px] table-fixed text-left">
+            <colgroup>
+              <col className="w-[9%]" />
+              <col className="w-[18%]" />
+              <col className="w-[31%]" />
+              <col className="w-[15%]" />
+              <col className="w-[11%]" />
+              <col className="w-[11%]" />
+              <col className="w-[5%]" />
+            </colgroup>
+            <thead className="bg-stone-50">
               <tr>
-                <td colSpan={6} className="px-6 py-12 text-center text-gray-400 font-bold">
-                  Đang tải thông báo...
-                </td>
+                <th className="px-5 py-5 text-[10px] font-black uppercase tracking-widest text-stone-400">ID</th>
+                <th className="px-5 py-5 text-[10px] font-black uppercase tracking-widest text-stone-400">Người nhận</th>
+                <th className="px-5 py-5 text-[10px] font-black uppercase tracking-widest text-stone-400">Nội dung</th>
+                <th className="px-5 py-5 text-[10px] font-black uppercase tracking-widest text-stone-400">Đối tượng</th>
+                <th className="px-5 py-5 text-center text-[10px] font-black uppercase tracking-widest text-stone-400">Trạng thái</th>
+                <th className="px-5 py-5 text-[10px] font-black uppercase tracking-widest text-stone-400">Thời gian</th>
+                <th className="px-5 py-5 text-center text-[10px] font-black uppercase tracking-widest text-stone-400">Thao tác</th>
               </tr>
-            ) : notifications.length === 0 ? (
-              <tr>
-                <td colSpan={6} className="px-6 py-16 text-center text-gray-400 font-bold">
-                  Không có thông báo phù hợp.
-                </td>
-              </tr>
-            ) : (
-              notifications.map((notification) => (
-                <tr key={notification.id} className="hover:bg-gray-50/70 transition-colors align-top">
-                  <td className="px-6 py-5">
-                    <p className="text-sm font-black text-gray-900 truncate" title={notification.recipientName || ""}>
-                      {notification.recipientName || "-"}
-                    </p>
-                    <p className="text-[10px] font-bold text-gray-400 break-all mt-1">#{notification.recipientId || "-"}</p>
-                  </td>
-                  <td className="px-6 py-5">
-                    <div className="flex items-start gap-3">
-                      {!notification.read && (
-                        <span className="mt-1.5 w-2.5 h-2.5 rounded-full bg-red-500 shrink-0 shadow-[0_0_0_4px_rgba(239,68,68,0.12)]"></span>
-                      )}
-                      <div className="min-w-0">
-                        <p className="text-sm font-black text-gray-900 line-clamp-1">{notification.title}</p>
-                        <p className="text-xs text-gray-500 line-clamp-2 mt-1">{notification.content}</p>
-                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mt-2">{notification.type}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-5">
-                    <span className={`inline-flex h-7 min-w-[92px] items-center justify-center rounded-xl border px-3 text-[10px] font-black uppercase tracking-wider ${getTargetTone(notification.targetType)}`}>
-                      {notification.targetType || "NONE"}
-                    </span>
-                    {notification.targetId && (
-                      <p className="mt-2 text-[10px] text-gray-400 font-bold truncate" title={notification.targetId}>
-                        {notification.targetId}
-                      </p>
-                    )}
-                  </td>
-                  <td className="px-6 py-5">
-                    <div className="flex justify-center">
-                      <span
-                        className={`inline-flex h-8 w-24 items-center justify-center rounded-xl text-[10px] font-black uppercase tracking-wider ${
-                          notification.read ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700"
-                        }`}
-                      >
-                        {notification.read ? "Đã đọc" : "Chưa đọc"}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-5">
-                    <p className="text-xs font-bold text-gray-600">{formatDateTime(notification.createdAt)}</p>
-                    {notification.readAt && (
-                      <p className="text-[10px] text-gray-400 mt-1">Đọc: {formatDateTime(notification.readAt)}</p>
-                    )}
-                  </td>
-                  <td className="px-6 py-5">
-                    <div className="flex justify-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => openEdit(notification)}
-                        className="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white transition-colors"
-                        title="Sửa thông báo"
-                      >
-                        <i className="fa-solid fa-pen text-xs"></i>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleDelete(notification)}
-                        className="w-9 h-9 rounded-xl bg-red-50 text-red-600 hover:bg-red-600 hover:text-white transition-colors"
-                        title="Xóa thông báo"
-                      >
-                        <i className="fa-solid fa-trash-can text-xs"></i>
-                      </button>
-                    </div>
-                  </td>
+            </thead>
+            <tbody className="divide-y divide-stone-100">
+              {loading ? (
+                <tr><td colSpan={7} className="px-6 py-16 text-center font-bold text-stone-400">Đang tải thông báo...</td></tr>
+              ) : notifications.length === 0 ? (
+                <tr><td colSpan={7} className="px-6 py-20 text-center font-bold text-stone-400">Không có thông báo phù hợp.</td></tr>
+              ) : notifications.map((notification) => (
+                <tr key={notification.id} className="align-top transition hover:bg-orange-50/40">
+                  <td className="px-5 py-5"><span className="inline-flex rounded-2xl bg-stone-950 px-3 py-2 text-xs font-black text-white">#{notification.id}</span></td>
+                  <td className="px-5 py-5"><p className="truncate text-sm font-black text-stone-900" title={notification.recipientName || ""}>{notification.recipientName || "-"}</p><p className="mt-1 break-all text-[10px] font-bold text-stone-400">#{notification.recipientId || "-"}</p></td>
+                  <td className="px-5 py-5"><div className="flex items-start gap-3">{!notification.read && <span className="mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full bg-orange-500 shadow-[0_0_0_4px_rgba(249,115,22,0.14)]"></span>}<div className="min-w-0"><p className="line-clamp-1 text-sm font-black text-stone-950">{notification.title}</p><p className="mt-1 line-clamp-2 text-xs leading-5 text-stone-500">{notification.content}</p><p className="mt-2 text-[10px] font-bold uppercase tracking-wider text-stone-400">{notification.type}</p></div></div></td>
+                  <td className="px-5 py-5"><span className={`inline-flex h-8 min-w-[96px] items-center justify-center rounded-2xl border px-3 text-[10px] font-black uppercase tracking-wider ${getTargetTone(notification.targetType)}`}>{notification.targetType || "NONE"}</span>{notification.targetId && <p className="mt-2 truncate text-[10px] font-bold text-stone-400" title={notification.targetId}>{notification.targetId}</p>}</td>
+                  <td className="px-5 py-5"><div className="flex justify-center"><span className={`inline-flex h-9 w-24 items-center justify-center rounded-2xl text-[10px] font-black uppercase tracking-wider ${notification.read ? "bg-emerald-100 text-emerald-700" : "bg-orange-100 text-orange-700"}`}>{notification.read ? "Đã đọc" : "Chưa đọc"}</span></div></td>
+                  <td className="px-5 py-5"><p className="text-xs font-bold text-stone-600">{formatDateTime(notification.createdAt)}</p>{notification.readAt && <p className="mt-1 text-[10px] text-stone-400">Đọc: {formatDateTime(notification.readAt)}</p>}</td>
+                  <td className="px-5 py-5"><div className="flex justify-center gap-2"><button type="button" onClick={() => openEdit(notification)} className="h-9 w-9 rounded-2xl bg-stone-100 text-stone-700 transition hover:bg-stone-950 hover:text-white" title="Sửa thông báo"><i className="fa-solid fa-pen text-xs"></i></button><button type="button" onClick={() => handleDelete(notification)} className="h-9 w-9 rounded-2xl bg-rose-50 text-rose-600 transition hover:bg-rose-600 hover:text-white" title="Xóa thông báo"><i className="fa-solid fa-trash-can text-xs"></i></button></div></td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+              ))}
+            </tbody>
+          </table>
+        </div>
 
-        <div className="px-6 py-5 bg-gray-50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-t border-gray-100">
-          <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
-            Trang {meta.page} / {meta.pages} - Tổng {meta.total}
-          </span>
+        <div className="flex flex-col gap-3 border-t border-stone-100 bg-stone-50 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
+          <span className="text-[10px] font-black uppercase tracking-widest text-stone-400">Trang {meta.page} / {meta.pages} - Tổng {meta.total}</span>
           <div className="flex gap-2">
-            <button
-              type="button"
-              disabled={currentPage === 1}
-              onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
-              className="px-5 py-2 bg-white rounded-xl text-xs font-black disabled:opacity-30 border border-gray-200"
-            >
-              Trước
-            </button>
-            <button
-              type="button"
-              disabled={currentPage >= meta.pages}
-              onClick={() => setCurrentPage((page) => Math.min(meta.pages, page + 1))}
-              className="px-5 py-2 bg-white rounded-xl text-xs font-black disabled:opacity-30 border border-gray-200"
-            >
-              Sau
-            </button>
+            <button type="button" disabled={currentPage === 1} onClick={() => setCurrentPage((page) => Math.max(1, page - 1))} className="rounded-2xl border border-stone-200 bg-white px-5 py-2 text-xs font-black disabled:opacity-30">Trước</button>
+            <button type="button" disabled={currentPage >= meta.pages} onClick={() => setCurrentPage((page) => Math.min(meta.pages, page + 1))} className="rounded-2xl border border-stone-200 bg-white px-5 py-2 text-xs font-black disabled:opacity-30">Sau</button>
           </div>
         </div>
       </div>
 
       {(isCreateOpen || editing) && (
         <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
-          <div
-            className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm"
-            onClick={() => {
-              if (!submitting) {
-                setIsCreateOpen(false);
-                setEditing(null);
-              }
-            }}
-          ></div>
-
-          <form
-            onSubmit={editing ? handleUpdate : handleCreate}
-            className="relative z-10 bg-white w-full max-w-2xl rounded-[32px] shadow-2xl overflow-hidden"
-          >
-            <div className="px-8 py-6 border-b border-gray-100 flex items-center justify-between">
-              <div>
-                <h2 className="text-xl font-black text-gray-900">
-                  {editing ? "Cập nhật thông báo" : "Tạo thông báo mới"}
-                </h2>
-                <p className="text-xs text-gray-400 font-bold mt-1">
-                  {editing ? `ID #${editing.id}` : "Gửi riêng cho một người dùng hoặc toàn bộ người dùng"}
-                </p>
+          <div className="absolute inset-0 bg-stone-950/70 backdrop-blur-sm" onClick={() => { if (!submitting) { setIsCreateOpen(false); setEditing(null); } }}></div>
+          <form onSubmit={editing ? handleUpdate : handleCreate} className="relative z-10 w-full max-w-2xl overflow-hidden rounded-[36px] bg-white shadow-2xl animate-in zoom-in-95 duration-300">
+            <div className="bg-gradient-to-br from-stone-950 to-orange-900 px-8 py-7 text-white">
+              <div className="flex items-center justify-between gap-4">
+                <div><p className="text-[10px] font-black uppercase tracking-[0.24em] text-orange-200">{editing ? `ID #${editing.id}` : "Tin nhắn mới"}</p><h2 className="mt-1 text-2xl font-black tracking-tight">{editing ? "Cập nhật thông báo" : "Tạo thông báo mới"}</h2></div>
+                <button type="button" onClick={() => { setIsCreateOpen(false); setEditing(null); }} className="flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white transition hover:bg-white/20" aria-label="Đóng"><i className="fa-solid fa-xmark"></i></button>
               </div>
-              <button
-                type="button"
-                onClick={() => {
-                  setIsCreateOpen(false);
-                  setEditing(null);
-                }}
-                className="w-10 h-10 rounded-full bg-gray-50 text-gray-400 hover:text-gray-700"
-                aria-label="Đóng"
-              >
-                <i className="fa-solid fa-xmark"></i>
-              </button>
             </div>
 
-            <div className="p-8 space-y-5 max-h-[70vh] overflow-y-auto">
+            <div className="max-h-[70vh] space-y-5 overflow-y-auto p-8">
               {!editing && (
-                <div className="space-y-3">
-                  <label className="flex items-center gap-3 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={form.sendToAll}
-                      onChange={(event) => setForm((prev) => ({ ...prev, sendToAll: event.target.checked }))}
-                      className="w-4 h-4 text-indigo-600"
-                    />
-                    <span className="text-sm font-black text-gray-700">Gửi đến tất cả người dùng</span>
-                  </label>
-
-                  {!form.sendToAll && (
-                    <input
-                      type="text"
-                      placeholder="ID người nhận, ví dụ u002"
-                      value={form.recipientId}
-                      onChange={(event) => setForm((prev) => ({ ...prev, recipientId: event.target.value }))}
-                      className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    />
-                  )}
+                <div className="rounded-3xl border border-stone-100 bg-stone-50 p-5">
+                  <label className="flex cursor-pointer items-center gap-3"><input type="checkbox" checked={form.sendToAll} onChange={(event) => setForm((prev) => ({ ...prev, sendToAll: event.target.checked }))} className="h-4 w-4 accent-orange-600" /><span className="text-sm font-black text-stone-700">Gửi đến tất cả người dùng</span></label>
+                  {!form.sendToAll && <input type="text" placeholder="ID người nhận, ví dụ u002" value={form.recipientId} onChange={(event) => setForm((prev) => ({ ...prev, recipientId: event.target.value }))} className="mt-4 w-full rounded-2xl border border-stone-200 bg-white px-5 py-4 text-sm outline-none focus:border-orange-400 focus:ring-4 focus:ring-orange-100" />}
                 </div>
               )}
-
-              <input
-                type="text"
-                placeholder="Tiêu đề"
-                value={editing ? editForm.title : form.title}
-                onChange={(event) =>
-                  editing
-                    ? setEditForm((prev) => ({ ...prev, title: event.target.value }))
-                    : setForm((prev) => ({ ...prev, title: event.target.value }))
-                }
-                className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              />
-
-              <textarea
-                placeholder="Nội dung"
-                rows={5}
-                value={editing ? editForm.content : form.content}
-                onChange={(event) =>
-                  editing
-                    ? setEditForm((prev) => ({ ...prev, content: event.target.value }))
-                    : setForm((prev) => ({ ...prev, content: event.target.value }))
-                }
-                className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-y"
-              />
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <input
-                  type="text"
-                  placeholder="Target ID"
-                  value={editing ? editForm.targetId : form.targetId}
-                  onChange={(event) =>
-                    editing
-                      ? setEditForm((prev) => ({ ...prev, targetId: event.target.value }))
-                      : setForm((prev) => ({ ...prev, targetId: event.target.value }))
-                  }
-                  className="px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                />
-                <select
-                  value={editing ? editForm.targetType : form.targetType}
-                  onChange={(event) =>
-                    editing
-                      ? setEditForm((prev) => ({ ...prev, targetType: event.target.value }))
-                      : setForm((prev) => ({ ...prev, targetType: event.target.value }))
-                  }
-                  className="px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  aria-label="Loại đối tượng liên quan"
-                >
-                  {TARGET_TYPES.map((target) => (
-                    <option key={target} value={target}>
-                      {target}
-                    </option>
-                  ))}
+              <input type="text" placeholder="Tiêu đề" value={editing ? editForm.title : form.title} onChange={(event) => editing ? setEditForm((prev) => ({ ...prev, title: event.target.value })) : setForm((prev) => ({ ...prev, title: event.target.value }))} className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-5 py-4 text-sm font-bold outline-none focus:border-orange-400 focus:bg-white focus:ring-4 focus:ring-orange-100" />
+              <textarea placeholder="Nội dung" rows={5} value={editing ? editForm.content : form.content} onChange={(event) => editing ? setEditForm((prev) => ({ ...prev, content: event.target.value })) : setForm((prev) => ({ ...prev, content: event.target.value }))} className="w-full resize-y rounded-2xl border border-stone-200 bg-stone-50 px-5 py-4 text-sm outline-none focus:border-orange-400 focus:bg-white focus:ring-4 focus:ring-orange-100" />
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <input type="text" placeholder="Target ID" value={editing ? editForm.targetId : form.targetId} onChange={(event) => editing ? setEditForm((prev) => ({ ...prev, targetId: event.target.value })) : setForm((prev) => ({ ...prev, targetId: event.target.value }))} className="rounded-2xl border border-stone-200 bg-stone-50 px-5 py-4 text-sm outline-none focus:border-orange-400 focus:bg-white focus:ring-4 focus:ring-orange-100" />
+                <select value={editing ? editForm.targetType : form.targetType} onChange={(event) => editing ? setEditForm((prev) => ({ ...prev, targetType: event.target.value })) : setForm((prev) => ({ ...prev, targetType: event.target.value }))} className="rounded-2xl border border-stone-200 bg-stone-50 px-5 py-4 text-sm font-black outline-none focus:border-orange-400 focus:ring-4 focus:ring-orange-100" aria-label="Loại đối tượng liên quan">
+                  {TARGET_TYPES.map((target) => <option key={target} value={target}>{target}</option>)}
                 </select>
               </div>
             </div>
 
-            <div className="px-8 py-5 bg-gray-50 border-t border-gray-100 flex justify-end gap-3">
-              <button
-                type="button"
-                onClick={() => {
-                  setIsCreateOpen(false);
-                  setEditing(null);
-                }}
-                className="px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest text-gray-500 hover:bg-white"
-              >
-                Hủy
-              </button>
-              <button
-                type="submit"
-                disabled={submitting}
-                className="px-7 py-3 rounded-2xl bg-indigo-600 text-white text-xs font-black uppercase tracking-widest hover:bg-indigo-700 disabled:opacity-50"
-              >
-                {submitting ? <i className="fa-solid fa-circle-notch animate-spin"></i> : editing ? "Lưu thay đổi" : "Gửi thông báo"}
-              </button>
+            <div className="flex justify-end gap-3 border-t border-stone-100 bg-stone-50 px-8 py-5">
+              <button type="button" onClick={() => { setIsCreateOpen(false); setEditing(null); }} className="rounded-2xl px-6 py-3 text-xs font-black uppercase tracking-widest text-stone-500 hover:bg-white">Hủy</button>
+              <button type="submit" disabled={submitting} className="rounded-2xl bg-stone-950 px-7 py-3 text-xs font-black uppercase tracking-widest text-white transition hover:bg-black disabled:opacity-50">{submitting ? <i className="fa-solid fa-circle-notch animate-spin"></i> : editing ? "Lưu thay đổi" : "Gửi thông báo"}</button>
             </div>
           </form>
         </div>

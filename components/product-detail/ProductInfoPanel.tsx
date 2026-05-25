@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import { Link } from "react-router-dom";
 import { Product } from "../../types/index";
 
@@ -16,13 +16,11 @@ interface ProductInfoPanelProps {
 }
 
 const getStatusClassName = (status: string) => {
-  if (status === "APPROVED")
-    return "border-green-100 bg-green-50 text-green-600";
-  if (status === "PENDING")
-    return "border-yellow-100 bg-yellow-50 text-yellow-600";
-  if (status === "REJECTED") return "border-red-100 bg-red-50 text-red-600";
-  if (status === "SOLD") return "border-gray-200 bg-gray-100 text-gray-600";
-  return "border-gray-100 bg-gray-50 text-gray-500";
+  if (status === "APPROVED") return "border-emerald-100 bg-emerald-50 text-emerald-700";
+  if (status === "PENDING") return "border-amber-100 bg-amber-50 text-amber-700";
+  if (status === "REJECTED") return "border-rose-100 bg-rose-50 text-rose-700";
+  if (status === "SOLD") return "border-slate-200 bg-slate-100 text-slate-600";
+  return "border-slate-100 bg-slate-50 text-slate-500";
 };
 
 const ProductInfoPanel: React.FC<ProductInfoPanelProps> = ({
@@ -37,212 +35,69 @@ const ProductInfoPanel: React.FC<ProductInfoPanelProps> = ({
   onDelete,
   onEdit,
 }) => (
-  <div className="lg:col-span-5 space-y-6">
-    <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm space-y-6">
-      <div className="border-b border-gray-50 pb-6 flex justify-between items-start">
-        <div className="flex-1 pr-4">
-          <span className="bg-indigo-50 text-indigo-600 text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full">
-            {product.categoryName}
-          </span>
-          <h1 className="text-3xl font-extrabold text-gray-900 leading-tight mt-3 mb-2">
-            {product.title}
-          </h1>
-          <p className="text-4xl font-black text-indigo-600 tracking-tight">
-            {product.price.toLocaleString("vi-VN")}đ
-          </p>
+  <div className="space-y-6 lg:col-span-5">
+    <div className="space-y-6 rounded-[36px] border border-white bg-white p-7 shadow-2xl shadow-slate-100 md:p-8">
+      <div className="flex items-start justify-between gap-4 border-b border-slate-100 pb-6">
+        <div className="min-w-0 flex-1">
+          <span className="rounded-full bg-orange-100 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-orange-700">{product.categoryName}</span>
+          <h2 className="mt-3 text-3xl font-black leading-tight tracking-tight text-slate-950">{product.title}</h2>
+          <p className="mt-2 text-4xl font-black tracking-tight text-orange-600">{product.price.toLocaleString("vi-VN")}đ</p>
         </div>
-
-        {canManage && (
-          <div
-            className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase border-2 whitespace-nowrap ${getStatusClassName(product.status)}`}
-          >
-            {product.status === "APPROVED" ? "ĐANG BÁN" : product.status}
-          </div>
-        )}
+        {canManage && <div className={`whitespace-nowrap rounded-2xl border px-3 py-2 text-[10px] font-black uppercase ${getStatusClassName(product.status)}`}>{product.status === "APPROVED" ? "ĐANG BÁN" : product.status}</div>}
       </div>
 
       {canManage && (
         <div className="space-y-4 animate-in fade-in duration-500">
           {product.aiStatus && (
-            <div
-              className={`p-5 rounded-2xl border ${
-                product.aiStatus === "OK"
-                  ? "bg-green-50/30 border-green-100"
-                  : product.aiStatus === "WARNING"
-                    ? "bg-yellow-50/50 border-yellow-100"
-                    : "bg-red-50/50 border-red-100"
-              }`}
-            >
-              <div className="flex items-center gap-2 text-xs font-black text-gray-900 uppercase tracking-widest mb-2">
-                <i className="fa-solid fa-robot text-indigo-600"></i>{" "}
-                Phân tích AI
-              </div>
-              <p className="text-xs text-gray-600 italic">
-                "{product.aiNote || "Không có ghi chú"}"
-              </p>
+            <div className={`rounded-3xl border p-5 ${product.aiStatus === "OK" ? "border-emerald-100 bg-emerald-50/50" : product.aiStatus === "WARNING" ? "border-amber-100 bg-amber-50/60" : "border-rose-100 bg-rose-50/60"}`}>
+              <div className="mb-2 flex items-center gap-2 text-xs font-black uppercase tracking-widest text-slate-950"><i className="fa-solid fa-robot text-orange-600"></i> Phân tích AI</div>
+              <p className="text-xs italic text-slate-600">"{product.aiNote || "Không có ghi chú"}"</p>
             </div>
           )}
-
           {product.adminNote && (
-            <div className="p-5 rounded-2xl bg-red-50 border border-red-200">
-              <div className="flex items-center gap-2 text-xs font-black text-red-700 uppercase tracking-widest mb-2">
-                <i className="fa-solid fa-user-shield"></i> Tin nhắn từ Admin
-              </div>
-              <p className="text-xs text-red-800 font-medium">
-                {product.adminNote}
-              </p>
+            <div className="rounded-3xl border border-rose-200 bg-rose-50 p-5">
+              <div className="mb-2 flex items-center gap-2 text-xs font-black uppercase tracking-widest text-rose-700"><i className="fa-solid fa-user-shield"></i> Tin nhắn từ Admin</div>
+              <p className="text-xs font-medium text-rose-800">{product.adminNote}</p>
             </div>
           )}
-
           {isSold && product.buyerInfo && (
-            <div className="bg-green-50 rounded-2xl p-5 border-2 border-green-100 space-y-3">
-              <div className="flex items-center gap-2 text-green-800 font-bold">
-                <i className="fa-solid fa-handshake"></i> Giao dịch thành công
-              </div>
-              <div className="bg-white/60 p-3 rounded-xl text-sm space-y-1">
-                <p>
-                  <span className="font-bold text-gray-500">Người mua:</span>{" "}
-                  <span className="font-bold text-gray-900">
-                    {product.buyerInfo.name}
-                  </span>
-                </p>
-                <p>
-                  <span className="font-bold text-gray-500">Thời gian:</span>{" "}
-                  {new Date(product.buyerInfo.buyTime).toLocaleString("vi-VN")}
-                </p>
-              </div>
+            <div className="space-y-3 rounded-3xl border border-emerald-100 bg-emerald-50 p-5">
+              <div className="flex items-center gap-2 font-black text-emerald-800"><i className="fa-solid fa-handshake"></i> Giao dịch thành công</div>
+              <div className="space-y-1 rounded-2xl bg-white/70 p-3 text-sm"><p><span className="font-bold text-slate-500">Người mua:</span> <span className="font-black text-slate-950">{product.buyerInfo.name}</span></p><p><span className="font-bold text-slate-500">Thời gian:</span> {new Date(product.buyerInfo.buyTime).toLocaleString("vi-VN")}</p></div>
             </div>
           )}
         </div>
       )}
 
-      <div className="space-y-6 pt-2">
-        <div className="flex items-start gap-4">
-          <div className="w-10 h-10 rounded-2xl bg-indigo-50 flex items-center justify-center flex-shrink-0 text-indigo-600">
-            {canManage ? (
-              <i className="fa-solid fa-user-check"></i>
-            ) : (
-              <i className="fa-solid fa-store"></i>
-            )}
-          </div>
-          <div>
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">
-              Người đăng tin
-            </p>
-            <div className="flex items-center gap-2 mt-1">
-              <Link
-                to={`/user/${product.sellerId}`}
-                className="flex items-center gap-2 hover:bg-gray-50 p-1 -ml-1 rounded-lg transition-colors"
-              >
-                <img
-                  src={sellerAvatar}
-                  className="w-6 h-6 rounded-full border border-gray-200"
-                  alt="avatar"
-                />
-                <p className="text-sm text-gray-700 font-bold">
-                  {product.sellerName}
-                </p>
-              </Link>
-              {isOwner && (
-                <span className="px-2 py-0.5 bg-gray-100 rounded text-[9px] text-gray-500 font-bold">
-                  BẠN
-                </span>
-              )}
-              {isAdmin && !isOwner && (
-                <span className="px-2 py-0.5 bg-indigo-600 rounded text-[9px] text-white font-bold tracking-tighter">
-                  QUẢN TRỊ VIÊN
-                </span>
-              )}
-              <div className="flex items-center text-yellow-500 text-xs gap-1 ml-2 bg-yellow-50 px-2 py-0.5 rounded-full">
-                <span className="font-bold">
-                  {product.sellerRating.toFixed(1)}
-                </span>
-                <i className="fa-solid fa-star text-[10px]"></i>
-              </div>
-            </div>
-          </div>
+      <div className="space-y-5 pt-2">
+        <div className="flex items-start gap-4 rounded-3xl bg-slate-50 p-4">
+          <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-orange-100 text-orange-700"><i className={`fa-solid ${canManage ? "fa-user-check" : "fa-store"}`}></i></div>
+          <div className="min-w-0"><p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Người đăng tin</p><div className="mt-2 flex flex-wrap items-center gap-2"><Link to={`/user/${product.sellerId}`} className="flex items-center gap-2 rounded-xl p-1 transition hover:bg-white"><img src={sellerAvatar} className="h-7 w-7 rounded-full border border-slate-200" alt="avatar" /><p className="text-sm font-black text-slate-700">{product.sellerName}</p></Link>{isOwner && <span className="rounded-lg bg-slate-200 px-2 py-0.5 text-[9px] font-black text-slate-500">BẠN</span>}{isAdmin && !isOwner && <span className="rounded-lg bg-slate-950 px-2 py-0.5 text-[9px] font-black text-white">QUẢN TRỊ VIÊN</span>}<div className="ml-1 flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-600"><span className="font-black">{product.sellerRating.toFixed(1)}</span><i className="fa-solid fa-star text-[10px]"></i></div></div></div>
         </div>
 
-        <div className="flex items-start gap-4">
-          <div className="w-10 h-10 rounded-2xl bg-indigo-50 flex items-center justify-center flex-shrink-0 text-indigo-600">
-            <i className="fa-solid fa-map-location-dot"></i>
-          </div>
-          <div>
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">
-              Khu vực giao dịch
-            </p>
-            <p className="text-sm text-gray-700 font-medium mt-1 leading-relaxed capitalize">
-              {product.addressDetail}, {product.ward}, {product.city}
-            </p>
-          </div>
+        <div className="flex items-start gap-4 rounded-3xl bg-slate-50 p-4">
+          <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-orange-100 text-orange-700"><i className="fa-solid fa-map-location-dot"></i></div>
+          <div><p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Khu vực giao dịch</p><p className="mt-1 text-sm font-semibold capitalize leading-relaxed text-slate-700">{product.addressDetail}, {product.ward}, {product.city}</p></div>
         </div>
 
-        <div className="flex items-start gap-4">
-          <div className="w-10 h-10 rounded-2xl bg-indigo-50 flex items-center justify-center flex-shrink-0 text-indigo-600">
-            <i className="fa-solid fa-align-left"></i>
-          </div>
-          <div className="flex-1">
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">
-              Mô tả chi tiết
-            </p>
-            <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">
-              {product.description}
-            </p>
-          </div>
+        <div className="flex items-start gap-4 rounded-3xl bg-slate-50 p-4">
+          <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-orange-100 text-orange-700"><i className="fa-solid fa-align-left"></i></div>
+          <div className="flex-1"><p className="mb-2 text-[10px] font-black uppercase tracking-widest text-slate-400">Mô tả chi tiết</p><p className="whitespace-pre-line text-sm leading-7 text-slate-600">{product.description}</p></div>
         </div>
       </div>
 
       {!isOwner && product.status === "APPROVED" && (
-        <div className="pt-6 space-y-4">
-          <button
-            onClick={onContactSeller}
-            className="w-full bg-indigo-600 text-white py-5 rounded-3xl font-black text-xl hover:bg-indigo-700 shadow-2xl shadow-indigo-100 transition-all flex items-center justify-center gap-4 active:scale-95 group"
-          >
-            <div className="bg-white/20 w-10 h-10 rounded-full flex items-center justify-center group-hover:rotate-12 transition-transform">
-              <i className="fa-solid fa-comment-dots"></i>
-            </div>
-            Nhắn tin cho người bán
-          </button>
-        </div>
+        <div className="pt-4"><button onClick={onContactSeller} className="group flex w-full items-center justify-center gap-4 rounded-3xl bg-slate-950 py-5 text-xl font-black text-white shadow-2xl shadow-slate-200 transition hover:-translate-y-0.5 hover:bg-black active:scale-95"><div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/15 transition group-hover:rotate-12"><i className="fa-solid fa-comment-dots"></i></div>Nhắn tin cho người bán</button></div>
       )}
 
       {canManage && (
-        <div className="pt-6 border-t border-gray-100 mt-6 space-y-4">
-          <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2">
-            <i className="fa-solid fa-gear mr-1"></i>{" "}
-            {isAdmin && !isOwner ? "Quyền quản trị" : "Quản lý tin đăng"}
-          </p>
+        <div className="mt-6 space-y-4 border-t border-slate-100 pt-6">
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400"><i className="fa-solid fa-gear mr-1"></i> {isAdmin && !isOwner ? "Quyền quản trị" : "Quản lý tin đăng"}</p>
           <div className="grid grid-cols-2 gap-4">
-            <button
-              disabled={!canEdit}
-              onClick={onEdit}
-              className={`py-4 rounded-2xl font-bold text-sm shadow-lg transition-all flex items-center justify-center gap-2 ${
-                canEdit
-                  ? "bg-gray-900 text-white hover:bg-black shadow-gray-200 active:scale-95"
-                  : "bg-gray-100 text-gray-400 cursor-not-allowed opacity-60"
-              }`}
-            >
-              <i className={`fa-solid ${canEdit ? "fa-pen" : "fa-lock"}`}></i>
-              {canEdit ? "Chỉnh sửa" : "Đang khóa sửa"}
-            </button>
-            <button
-              disabled={isSold}
-              onClick={onDelete}
-              className={`py-4 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${
-                !isSold
-                  ? "bg-white text-red-600 border-2 border-red-100 hover:bg-red-50"
-                  : "bg-gray-50 text-gray-300"
-              }`}
-            >
-              <i className="fa-solid fa-trash-can"></i> Gỡ tin
-            </button>
+            <button disabled={!canEdit} onClick={onEdit} className={`flex items-center justify-center gap-2 rounded-2xl py-4 text-sm font-black shadow-lg transition ${canEdit ? "bg-slate-950 text-white shadow-slate-200 hover:bg-black active:scale-95" : "cursor-not-allowed bg-slate-100 text-slate-400 opacity-60"}`}><i className={`fa-solid ${canEdit ? "fa-pen" : "fa-lock"}`}></i>{canEdit ? "Chỉnh sửa" : "Đang khóa sửa"}</button>
+            <button disabled={isSold} onClick={onDelete} className={`flex items-center justify-center gap-2 rounded-2xl py-4 text-sm font-black transition ${!isSold ? "border-2 border-rose-100 bg-white text-rose-600 hover:bg-rose-50" : "bg-slate-50 text-slate-300"}`}><i className="fa-solid fa-trash-can"></i> Gỡ tin</button>
           </div>
-
-          {isOwner && product.status === "APPROVED" && (
-            <button className="w-full bg-indigo-50 text-indigo-600 py-4 rounded-2xl font-bold text-sm hover:bg-indigo-100 transition-all border border-indigo-100">
-              <i className="fa-solid fa-check-double mr-2"></i> Đánh dấu đã bán
-            </button>
-          )}
+          {isOwner && product.status === "APPROVED" && <button className="w-full rounded-2xl border border-orange-100 bg-orange-50 py-4 text-sm font-black text-orange-700 transition hover:bg-orange-100"><i className="fa-solid fa-check-double mr-2"></i> Đánh dấu đã bán</button>}
         </div>
       )}
     </div>

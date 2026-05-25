@@ -25,8 +25,8 @@ export default function RoleRoute({ allowed = [], children }) {
   const ok = user?.roles?.some(r => allowed.includes(r)) ?? false;
 
   if (!ok) {
-    console.warn("Truy cập bị từ chối: User không có quyền ADMIN");
-    return <Navigate to="/" replace />; // Hoặc trang /403 nếu bạn đã tạo
+    console.warn("Truy cập bị từ chối: User không có quyền phù hợp");
+    return <Navigate to="/" replace />; // Hoặc trang /403 nếu đã tạo
   }
 
   return children;

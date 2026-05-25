@@ -1,4 +1,4 @@
-﻿// src/config/api.js
+// src/config/api.js
 import axios from "./axios-customize";
 
 // API Auth
@@ -78,6 +78,10 @@ export const deleteProductAPI = (id) => {
 };
 // ====== API CATEGORIES ======
 export const getCategoriesAPI = () => axios.get("/s2s/categories");
+export const getCategoryByIdAPI = (id) => axios.get(`/s2s/categories/${id}`);
+export const createCategoryAPI = (data) => axios.post("/s2s/categories", data);
+export const updateCategoryAPI = (id, data) => axios.put(`/s2s/categories/${id}`, data);
+export const deleteCategoryAPI = (id) => axios.delete(`/s2s/categories/${id}`);
 export const forwardGeocodeAPI = (data) =>
   axios.post("/s2s/geocoding/forward", data);
 
@@ -98,8 +102,8 @@ export const getTransactionByProductAPI = (productId) =>
 
 
 // ====== API CHATBOT ======
-export const chatBotAPI = (message) =>
-  axios.get(`/s2s/chatBot?message=${encodeURIComponent(message)}`);
+export const chatBotAPI = ({ message, sessionId }) =>
+  axios.post("/s2s/chatBot", { message, sessionId });
 
 // ====== API CHAT (CONVERSATION) ======
 
@@ -247,12 +251,12 @@ export const deleteAdminProductAPI = (id) => {
     return axios.delete(`/s2s/products/admin/${id}`);
 };
 
-// APPROVE (Duyá»‡t) - Body: { adminNote, version }
+// APPROVE (Duyệt) - Body: { adminNote, version }
 export const approveProductAPI = (id, data) => {
     return axios.post(`/s2s/products/${id}/approve`, data);
 };
 
-// REJECT (Tá»« chá»‘i) - Body: { adminNote, version }
+// REJECT (Từ chối) - Body: { adminNote, version }
 export const rejectProductAPI = (id, data) => {
     return axios.post(`/s2s/products/${id}/reject`, data);
 };
@@ -293,5 +297,10 @@ export const deleteAdminNotificationAPI = (id) =>
 
 export const getAdminNotificationStatsAPI = () =>
   axios.get('/s2s/admin/notifications/stats');
+
+
+
+
+
 
 

@@ -1,16 +1,36 @@
-import React, { useState, useEffect } from "react";
+﻿import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Product, ProductStatus } from "../../types";
 import {
-  getAdminProductsAPI,
-  createAdminProductAPI,
   changeProductStatusAPI,
-  updateAdminProductAPI,
+  createAdminProductAPI,
   deleteAdminProductAPI,
+  getAdminProductsAPI,
+  updateAdminProductAPI,
 } from "../../config/api";
 import { getImageUrl } from "../../utils/imageHelper";
 
 const AiStatusOptions = ["OK", "WARNING", "SCAM", "SPAM", "PENDING"];
+const PAGE_SIZE = 10;
+
+const fieldClass = "w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-700 outline-none transition-all placeholder:text-slate-400 focus:border-teal-300 focus:bg-white focus:ring-4 focus:ring-teal-100";
+const labelClass = "mb-1.5 block text-[11px] font-black uppercase tracking-widest text-slate-500";
+
+const getStatusTheme = (status?: string) => {
+  if (status === "APPROVED") return "bg-emerald-50 text-emerald-700 border-emerald-100";
+  if (status === "PENDING") return "bg-amber-50 text-amber-700 border-amber-100";
+  if (status === "REJECTED") return "bg-rose-50 text-rose-700 border-rose-100";
+  if (status === "SOLD") return "bg-sky-50 text-sky-700 border-sky-100";
+  return "bg-slate-100 text-slate-600 border-slate-200";
+};
+
+const getAiTheme = (status?: string) => {
+  if (status === "OK") return "bg-emerald-50 text-emerald-700 border-emerald-100";
+  if (status === "WARNING") return "bg-amber-50 text-amber-700 border-amber-100";
+  if (status === "SCAM") return "bg-rose-50 text-rose-700 border-rose-100";
+  if (status === "SPAM") return "bg-orange-50 text-orange-700 border-orange-100";
+  return "bg-slate-100 text-slate-600 border-slate-200";
+};
 
 const AdminProductManagement: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -22,13 +42,7 @@ const AdminProductManagement: React.FC = () => {
   const [sellerId, setSellerId] = useState("");
   const [sortDir, setSortDir] = useState("DESC");
   const [currentPage, setCurrentPage] = useState(1);
-  const [meta, setMeta] = useState({
-    page: 1,
-    pageSize: 10,
-    pages: 1,
-    total: 0,
-  });
-  const pageSize = 10;
+  const [meta, setMeta] = useState({ page: 1, pageSize: PAGE_SIZE, pages: 1, total: 0 });
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [newProductData, setNewProductData] = useState<any>({
@@ -44,23 +58,14 @@ const AdminProductManagement: React.FC = () => {
     longitude: "",
     status: "PENDING",
   });
-  // CŨ: const [newImages, setNewImages] = useState<FileList | null>(null);
-  // MỚI: Khởi tạo mảng rỗng
   const [newImages, setNewImages] = useState<File[]>([]);
-
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any>(null);
 
-  // Fetch products from server
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const params: any = {
-        page: currentPage,
-        size: pageSize,
-        sortBy: "createdAt",
-        sortDir,
-      };
+      const params: any = { page: currentPage, size: PAGE_SIZE, sortBy: "createdAt", sortDir };
       if (keyword) params.keyword = keyword;
       if (categoryId) params.categoryId = categoryId;
       if (sellerId) params.sellerId = sellerId;
@@ -70,7 +75,7 @@ const AdminProductManagement: React.FC = () => {
       const res = (await getAdminProductsAPI(params)) as any;
       if (res) {
         setProducts(res.result || []);
-        setMeta(res.meta || { page: 1, pageSize: 10, pages: 1, total: 0 });
+        setMeta(res.meta || { page: 1, pageSize: PAGE_SIZE, pages: 1, total: 0 });
       }
     } catch (error) {
       console.error("Failed to fetch products:", error);
@@ -85,65 +90,30 @@ const AdminProductManagement: React.FC = () => {
 
   useEffect(() => {
     fetchProducts();
-  }, [
-    currentPage,
-    keyword,
-    statusFilter,
-    aiStatusFilter,
-    categoryId,
-    sellerId,
-    sortDir,
-  ]);
+  }, [currentPage, keyword, statusFilter, aiStatusFilter, categoryId, sellerId, sortDir]);
 
   const handleStatusFilterChange = (status: string) => {
-    setStatusFilter((prev) =>
-      prev.includes(status)
-        ? prev.filter((s) => s !== status)
-        : [...prev, status],
-    );
+    setStatusFilter((prev) => (prev.includes(status) ? prev.filter((s) => s !== status) : [...prev, status]));
   };
 
   const openCreateModal = () => {
-    setNewProductData({
-      sellerId: "",
-      title: "",
-      description: "",
-      price: 0,
-      categoryId: "",
-      city: "",
-      ward: "",
-      addressDetail: "",
-      latitude: "",
-      longitude: "",
-      status: "PENDING",
-    });
+    setNewProductData({ sellerId: "", title: "", description: "", price: 0, categoryId: "", city: "", ward: "", addressDetail: "", latitude: "", longitude: "", status: "PENDING" });
     setNewImages([]);
     setIsCreateModalOpen(true);
   };
 
+  const normalizePayload = (data: any) => ({
+    ...data,
+    categoryId: data.categoryId ? Number(data.categoryId) : null,
+    latitude: data.latitude ? Number(data.latitude) : null,
+    longitude: data.longitude ? Number(data.longitude) : null,
+  });
+
   const handleCreateSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const payload = {
-        ...newProductData,
-        categoryId: newProductData.categoryId
-          ? Number(newProductData.categoryId)
-          : null,
-        latitude: newProductData.latitude
-          ? Number(newProductData.latitude)
-          : null,
-        longitude: newProductData.longitude
-          ? Number(newProductData.longitude)
-          : null,
-      };
-
-      // ✅ SỬA: newImages đã là mảng rồi, dùng trực tiếp luôn
-      const imgs = newImages;
-
-      await createAdminProductAPI(payload, imgs);
+      await createAdminProductAPI(normalizePayload(newProductData), newImages);
       alert("Tạo sản phẩm thành công!");
-
-      // Reset về mảng rỗng sau khi thành công
       setNewImages([]);
       setIsCreateModalOpen(false);
       await fetchProducts();
@@ -155,77 +125,41 @@ const AdminProductManagement: React.FC = () => {
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      // 1. Chuyển FileList thành Array
-      const selectedFiles = Array.from(e.target.files);
-
-      // 2. Cộng dồn vào state cũ
-      setNewImages((prev) => [...prev, ...selectedFiles]);
-
-      // 3. (Quan trọng) Reset input để nếu user chọn lại file vừa chọn thì onChange vẫn nổ
+      setNewImages((prev) => [...prev, ...Array.from(e.target.files || [])]);
       e.target.value = "";
     }
   };
-  const handleRemoveImage = (indexToRemove: number) => {
-    setNewImages((prev) => prev.filter((_, index) => index !== indexToRemove));
-  };
 
-  // ✅ HÀM MỚI: Mở Modal Sửa & Fill dữ liệu cũ vào
   const openEditModal = (product: Product) => {
+    const p = product as any;
     setEditingProduct({
       id: product.id,
       title: product.title,
       description: product.description,
       price: product.price,
-      categoryId: product.categoryId || "", // Đảm bảo API trả về field này hoặc mapping đúng
+      categoryId: p.categoryId || "",
       status: product.status,
-
-      // Các field Admin quyền lực
       sellerId: product.sellerId,
       aiStatus: product.aiStatus || "PENDING",
       adminNote: product.adminNote || "",
-
-      // Địa chỉ
       city: product.city || "",
       ward: product.ward || "",
       addressDetail: product.addressDetail || "",
-      latitude:
-        product.latitude !== undefined && product.latitude !== null
-          ? String(product.latitude)
-          : "",
-      longitude:
-        product.longitude !== undefined && product.longitude !== null
-          ? String(product.longitude)
-          : "",
+      latitude: p.latitude !== undefined && p.latitude !== null ? String(p.latitude) : "",
+      longitude: p.longitude !== undefined && p.longitude !== null ? String(p.longitude) : "",
     });
     setIsEditModalOpen(true);
   };
 
-  // ✅ HÀM MỚI: Submit Update
   const handleUpdateSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!editingProduct) return;
     try {
-      if (!editingProduct) return;
-
-      const payload = {
-        ...editingProduct,
-        categoryId: editingProduct.categoryId
-          ? Number(editingProduct.categoryId)
-          : null,
-        latitude: editingProduct.latitude
-          ? Number(editingProduct.latitude)
-          : null,
-        longitude: editingProduct.longitude
-          ? Number(editingProduct.longitude)
-          : null,
-      };
-
-      // Gọi API PUT
-      await updateAdminProductAPI(editingProduct.id, payload);
-
+      await updateAdminProductAPI(editingProduct.id, normalizePayload(editingProduct));
       alert("Cập nhật thành công!");
       setIsEditModalOpen(false);
       setEditingProduct(null);
-      await fetchProducts(); // Refresh lại bảng
+      await fetchProducts();
     } catch (err) {
       console.error("Update failed", err);
       alert("Cập nhật thất bại");
@@ -233,37 +167,21 @@ const AdminProductManagement: React.FC = () => {
   };
 
   const handleDeleteProduct = async (id: string) => {
-    if (
-      !window.confirm(
-        "⚠️ CẢNH BÁO: Bạn có chắc chắn muốn XÓA VĨNH VIỄN sản phẩm này không?\nHành động này không thể hoàn tác.",
-      )
-    ) {
-      return;
-    }
-
+    if (!window.confirm("CẢNH BÁO: Bạn có chắc chắn muốn xóa vĩnh viễn sản phẩm này không? Hành động này không thể hoàn tác.")) return;
     try {
       const response = await deleteAdminProductAPI(id);
-
-      alert(
-        typeof response === "string" ? response : "Xóa sản phẩm thành công!",
-      );
-
+      alert(typeof response === "string" ? response : "Xóa sản phẩm thành công!");
       await fetchProducts();
     } catch (error) {
       console.error("Delete failed", error);
-      alert("❌ Xóa thất bại! Có thể sản phẩm không tồn tại hoặc lỗi mạng.");
+      alert("Xóa thất bại! Có thể sản phẩm không tồn tại hoặc lỗi mạng.");
     }
   };
 
   const handleChangeStatus = async (productId: string, newStatus: string) => {
     const oldProducts = [...products];
-    const updatedProducts = products.map((p) =>
-      p.id === productId ? { ...p, status: newStatus } : p,
-    );
-    setProducts(updatedProducts as Product[]); // Ép kiểu nếu cần
-
+    setProducts(products.map((p) => (p.id === productId ? ({ ...p, status: newStatus } as Product) : p)));
     try {
-      // 3. Gọi API
       await changeProductStatusAPI(productId, newStatus);
     } catch (error) {
       console.error("Change status failed", error);
@@ -272,810 +190,89 @@ const AdminProductManagement: React.FC = () => {
     }
   };
 
+  const activeFilters = useMemo(() => statusFilter.length + Number(Boolean(aiStatusFilter)) + Number(Boolean(categoryId)) + Number(Boolean(sellerId)), [aiStatusFilter, categoryId, sellerId, statusFilter]);
+
+  const renderProductForm = (mode: "create" | "edit") => {
+    const data = mode === "create" ? newProductData : editingProduct;
+    const setData = mode === "create" ? setNewProductData : setEditingProduct;
+    const submit = mode === "create" ? handleCreateSubmit : handleUpdateSubmit;
+    const close = () => (mode === "create" ? setIsCreateModalOpen(false) : setIsEditModalOpen(false));
+
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="absolute inset-0 bg-slate-950/50 backdrop-blur-sm" onClick={close} />
+        <div className="relative z-10 flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-[2rem] bg-white shadow-2xl animate-in zoom-in-95 duration-200">
+          <div className="flex items-center justify-between border-b border-slate-100 bg-slate-950 px-7 py-5 text-white">
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-[0.24em] text-teal-200">Product studio</p>
+              <h3 className="mt-1 text-2xl font-black tracking-tight">{mode === "create" ? "Tạo sản phẩm mới" : "Chỉnh sửa sản phẩm"}</h3>
+            </div>
+            <button onClick={close} className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10 text-white transition hover:bg-white/20" type="button"><i className="fa-solid fa-xmark" /></button>
+          </div>
+
+          <form onSubmit={submit} className="flex min-h-0 flex-1 flex-col">
+            <div className="flex-1 space-y-6 overflow-y-auto p-7">
+              <section className="rounded-[1.5rem] border border-teal-100 bg-teal-50/60 p-5">
+                <p className="mb-4 text-xs font-black uppercase tracking-[0.2em] text-teal-700"><i className="fa-solid fa-user-shield mr-2" />Quản trị</p>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div><label className={labelClass}>Seller ID</label><input disabled={mode === "edit"} value={data.sellerId || ""} onChange={(e) => setData((p: any) => ({ ...p, sellerId: e.target.value }))} className={`${fieldClass} disabled:cursor-not-allowed disabled:bg-white/60`} /></div>
+                  <div><label className={labelClass}>Trạng thái</label><select value={data.status} onChange={(e) => setData((p: any) => ({ ...p, status: e.target.value }))} className={fieldClass}>{Object.values(ProductStatus).map((s) => <option key={s} value={s}>{s}</option>)}</select></div>
+                  {mode === "edit" && <div><label className={labelClass}>AI Status</label><select value={data.aiStatus} onChange={(e) => setData((p: any) => ({ ...p, aiStatus: e.target.value }))} className={fieldClass}>{AiStatusOptions.map((s) => <option key={s} value={s}>{s}</option>)}</select></div>}
+                  {mode === "edit" && <div><label className={labelClass}>Ghi chú Admin</label><input value={data.adminNote || ""} onChange={(e) => setData((p: any) => ({ ...p, adminNote: e.target.value }))} className={fieldClass} placeholder="Lý do / ghi chú nội bộ" /></div>}
+                </div>
+              </section>
+
+              <section className="grid gap-4 sm:grid-cols-2">
+                <div className="sm:col-span-2"><label className={labelClass}>Tiêu đề sản phẩm</label><input value={data.title || ""} onChange={(e) => setData((p: any) => ({ ...p, title: e.target.value }))} className={fieldClass} placeholder="VD: Giáo trình Kinh tế vi mô" /></div>
+                <div><label className={labelClass}>Giá bán (VNĐ)</label><input type="number" value={data.price || 0} onChange={(e) => setData((p: any) => ({ ...p, price: Number(e.target.value) }))} className={fieldClass} /></div>
+                <div><label className={labelClass}>Category ID</label><input value={data.categoryId || ""} onChange={(e) => setData((p: any) => ({ ...p, categoryId: e.target.value }))} className={fieldClass} placeholder="ID danh mục" /></div>
+                <div className="sm:col-span-2"><label className={labelClass}>Mô tả chi tiết</label><textarea rows={5} value={data.description || ""} onChange={(e) => setData((p: any) => ({ ...p, description: e.target.value }))} className={`${fieldClass} resize-none`} placeholder="Mô tả tình trạng, cách giao dịch, lưu ý..." /></div>
+              </section>
+
+              <section className="rounded-[1.5rem] border border-slate-100 bg-slate-50 p-5">
+                <p className="mb-4 text-xs font-black uppercase tracking-[0.2em] text-slate-600"><i className="fa-solid fa-location-dot mr-2 text-teal-600" />Địa chỉ giao dịch</p>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {["city", "ward", "addressDetail", "latitude", "longitude"].map((key) => <div key={key} className={key === "addressDetail" ? "sm:col-span-2" : ""}><label className={labelClass}>{key === "city" ? "Tỉnh / Thành phố" : key === "ward" ? "Phường / Xã" : key === "addressDetail" ? "Số nhà / Tên đường" : key}</label><input type={key.includes("itude") ? "number" : "text"} step="any" value={data[key] || ""} onChange={(e) => setData((p: any) => ({ ...p, [key]: e.target.value }))} className={fieldClass} /></div>)}
+                </div>
+              </section>
+
+              {mode === "create" && <section><label className={labelClass}>Hình ảnh</label><label className="flex h-36 cursor-pointer flex-col items-center justify-center rounded-[1.5rem] border-2 border-dashed border-teal-200 bg-teal-50/60 transition hover:bg-teal-50"><i className="fa-solid fa-cloud-arrow-up mb-2 text-3xl text-teal-500" /><p className="text-sm font-bold text-slate-600">Bấm để tải ảnh sản phẩm</p><input id="product-images" type="file" multiple onChange={handleImageChange} className="hidden" /></label>{newImages.length > 0 && <div className="mt-4 grid grid-cols-4 gap-3">{newImages.map((file, index) => <div key={`${file.name}-${index}`} className="group relative h-24 overflow-hidden rounded-2xl bg-slate-100"><img src={URL.createObjectURL(file)} alt="preview" className="h-full w-full object-cover" /><button type="button" onClick={() => setNewImages((prev) => prev.filter((_, i) => i !== index))} className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-slate-950/70 text-xs text-white hover:bg-rose-500"><i className="fa-solid fa-xmark" /></button></div>)}</div>}</section>}
+            </div>
+
+            <div className="flex justify-end gap-3 border-t border-slate-100 bg-slate-50 px-7 py-5">
+              <button type="button" onClick={close} className="rounded-2xl px-6 py-3 text-sm font-black text-slate-500 hover:bg-white">Hủy</button>
+              <button type="submit" className="rounded-2xl bg-teal-600 px-7 py-3 text-sm font-black text-white shadow-lg shadow-teal-100 transition hover:bg-teal-700 active:scale-95">{mode === "create" ? "Tạo sản phẩm" : "Lưu thay đổi"}</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    );
+  };
+
   return (
-    <div className="space-y-8 animate-in slide-in-from-right-4 duration-500">
-      <h1 className="text-3xl font-black text-gray-900 tracking-tight">
-        Tất cả sản phẩm
-      </h1>
-
-      <div className="flex items-center justify-between">
-        <button
-          onClick={openCreateModal}
-          className="px-4 py-2 bg-indigo-600 text-white rounded-2xl font-bold"
-        >
-          Thêm sản phẩm
-        </button>
-      </div>
-
-      {isCreateModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          {" "}
-          {/* Thêm p-4 để cách lề màn hình mobile */}
-          <div
-            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-            onClick={() => setIsCreateModalOpen(false)}
-          />
-          {/* ✅ SỬA 1: Thêm max-h-[90vh], flex flex-col để chia bố cục */}
-          <div className="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl z-10 max-h-[90vh] flex flex-col overflow-hidden">
-            {/* ✅ HEADER: Cố định */}
-            <div className="px-8 py-5 border-b border-gray-100 flex justify-between items-center bg-white shrink-0">
-              <h3 className="text-xl font-black text-gray-800">
-                Tạo sản phẩm mới
-              </h3>
-              <button
-                onClick={() => setIsCreateModalOpen(false)}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                <i className="fa-solid fa-xmark text-xl"></i>
-              </button>
-            </div>
-
-            {/* FORM WRAPPER */}
-            <form
-              onSubmit={handleCreateSubmit}
-              className="flex flex-col flex-1 overflow-hidden"
-            >
-              {/* ✅ BODY: Cuộn dọc (overflow-y-auto) */}
-              <div className="p-8 overflow-y-auto flex-1 custom-scrollbar">
-                <div className="grid grid-cols-2 gap-4">
-                  <input
-                    placeholder="Seller ID"
-                    value={newProductData.sellerId}
-                    onChange={(e) =>
-                      setNewProductData((prev: any) => ({
-                        ...prev,
-                        sellerId: e.target.value,
-                      }))
-                    }
-                    className="px-4 py-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
-                  />
-                  <input
-                    placeholder="Category ID"
-                    value={newProductData.categoryId}
-                    onChange={(e) =>
-                      setNewProductData((prev: any) => ({
-                        ...prev,
-                        categoryId: e.target.value,
-                      }))
-                    }
-                    className="px-4 py-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
-                  />
-                  <input
-                    placeholder="Title"
-                    value={newProductData.title}
-                    onChange={(e) =>
-                      setNewProductData((prev: any) => ({
-                        ...prev,
-                        title: e.target.value,
-                      }))
-                    }
-                    className="col-span-2 px-4 py-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
-                  />
-                  <textarea
-                    placeholder="Description"
-                    rows={3}
-                    value={newProductData.description}
-                    onChange={(e) =>
-                      setNewProductData((prev: any) => ({
-                        ...prev,
-                        description: e.target.value,
-                      }))
-                    }
-                    className="col-span-2 px-4 py-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none resize-none"
-                  />
-                  <input
-                    placeholder="Price"
-                    type="number"
-                    value={newProductData.price}
-                    onChange={(e) =>
-                      setNewProductData((prev: any) => ({
-                        ...prev,
-                        price: Number(e.target.value),
-                      }))
-                    }
-                    className="px-4 py-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
-                  />
-
-                  <select
-                    aria-label="Trạng thái"
-                    value={newProductData.status}
-                    onChange={(e) =>
-                      setNewProductData((prev: any) => ({
-                        ...prev,
-                        status: e.target.value,
-                      }))
-                    }
-                    className="px-4 py-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none bg-white"
-                  >
-                    {Object.values(ProductStatus).map((s) => (
-                      <option key={s} value={s}>
-                        {s}
-                      </option>
-                    ))}
-                  </select>
-
-                  <input
-                    placeholder="City"
-                    value={newProductData.city}
-                    onChange={(e) =>
-                      setNewProductData((prev: any) => ({
-                        ...prev,
-                        city: e.target.value,
-                      }))
-                    }
-                    className="px-4 py-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
-                  />
-                  <input
-                    placeholder="Ward"
-                    value={newProductData.ward}
-                    onChange={(e) =>
-                      setNewProductData((prev: any) => ({
-                        ...prev,
-                        ward: e.target.value,
-                      }))
-                    }
-                    className="px-4 py-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
-                  />
-                  <input
-                    placeholder="Address detail"
-                    value={newProductData.addressDetail}
-                    onChange={(e) =>
-                      setNewProductData((prev: any) => ({
-                        ...prev,
-                        addressDetail: e.target.value,
-                      }))
-                    }
-                    className="col-span-2 px-4 py-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
-                  />
-
-                  {/* Phần chọn ảnh */}
-                  <div className="col-span-2">
-                    <input
-                      placeholder="Latitude"
-                      type="number"
-                      step="any"
-                      value={newProductData.latitude}
-                      onChange={(e) =>
-                        setNewProductData((prev: any) => ({
-                          ...prev,
-                          latitude: e.target.value,
-                        }))
-                      }
-                      className="px-4 py-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
-                    />
-                    <input
-                      placeholder="Longitude"
-                      type="number"
-                      step="any"
-                      value={newProductData.longitude}
-                      onChange={(e) =>
-                        setNewProductData((prev: any) => ({
-                          ...prev,
-                          longitude: e.target.value,
-                        }))
-                      }
-                      className="px-4 py-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
-                    />
-
-                    <label
-                      htmlFor="product-images"
-                      className="text-sm font-bold block mb-2 text-gray-700"
-                    >
-                      Images
-                    </label>
-                    <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100">
-                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                        <i className="fa-solid fa-cloud-arrow-up text-2xl text-gray-400 mb-2"></i>
-                        <p className="text-sm text-gray-500">
-                          <span className="font-semibold">Click to upload</span>{" "}
-                          or drag and drop
-                        </p>
-                      </div>
-                      <input
-                        id="product-images"
-                        type="file"
-                        multiple
-                        onChange={handleImageChange}
-                        className="hidden"
-                      />
-                    </label>
-
-                    {/* Preview ảnh */}
-                    {newImages.length > 0 && (
-                      <div className="mt-4 grid grid-cols-4 gap-3">
-                        {newImages.map((file, index) => (
-                          <div
-                            key={index}
-                            className="relative group border rounded-lg overflow-hidden h-20 bg-gray-100"
-                          >
-                            <img
-                              src={URL.createObjectURL(file)}
-                              alt="preview"
-                              className="w-full h-full object-cover"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => handleRemoveImage(index)}
-                              className="absolute top-1 right-1 bg-black/50 hover:bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px] transition-all"
-                            >
-                              <i className="fa-solid fa-xmark"></i>
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* ✅ FOOTER: Cố định ở dưới cùng */}
-              <div className="px-8 py-5 border-t border-gray-100 bg-gray-50 flex justify-end gap-3 shrink-0 rounded-b-2xl">
-                <button
-                  type="button"
-                  onClick={() => setIsCreateModalOpen(false)}
-                  className="px-6 py-2.5 rounded-xl border border-gray-300 font-bold text-gray-700 hover:bg-gray-100 transition-colors"
-                >
-                  Hủy bỏ
-                </button>
-                <button
-                  type="submit"
-                  className="px-6 py-2.5 rounded-xl bg-indigo-600 font-bold text-white hover:bg-indigo-700 shadow-lg shadow-indigo-200 transition-all transform active:scale-95"
-                >
-                  Tạo sản phẩm
-                </button>
-              </div>
-            </form>
-          </div>
+    <div className="animate-in fade-in slide-in-from-right-4 space-y-6 duration-500">
+      <section className="relative overflow-hidden rounded-[2rem] bg-slate-950 p-6 text-white shadow-2xl shadow-slate-900/10 sm:p-8">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_16%_20%,rgba(20,184,166,0.34),transparent_26%),radial-gradient(circle_at_88%_8%,rgba(251,191,36,0.24),transparent_24%)]" />
+        <i className="fa-solid fa-boxes-stacked absolute -bottom-10 right-8 text-[10rem] text-white/5" />
+        <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-2xl"><span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-[10px] font-black uppercase tracking-[0.22em] text-teal-100 ring-1 ring-white/15"><i className="fa-solid fa-store" /> Product hub</span><h1 className="mt-5 text-3xl font-black leading-tight tracking-tight sm:text-4xl">Quản lý toàn bộ sản phẩm trên sàn</h1><p className="mt-3 text-sm font-medium leading-7 text-slate-300">Theo dõi, chỉnh sửa trạng thái, kiểm tra AI và hỗ trợ sinh viên đăng bán minh bạch hơn.</p></div>
+          <div className="grid grid-cols-2 gap-3 sm:min-w-[360px]"><div className="rounded-[1.5rem] bg-white/10 p-4 ring-1 ring-white/10"><p className="text-[10px] font-black uppercase tracking-widest text-slate-300">Tổng sản phẩm</p><p className="mt-2 text-4xl font-black tracking-tighter">{meta.total}</p></div><button onClick={openCreateModal} className="rounded-[1.5rem] bg-amber-300 p-4 text-left text-slate-950 transition hover:-translate-y-0.5 hover:bg-amber-200"><i className="fa-solid fa-plus mb-3 text-xl" /><p className="text-xs font-black uppercase tracking-widest">Thêm sản phẩm</p></button></div>
         </div>
-      )}
+      </section>
 
-      {isEditModalOpen && editingProduct && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div
-            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-            onClick={() => setIsEditModalOpen(false)}
-          />
-          <div className="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl z-10 max-h-[90vh] flex flex-col overflow-hidden">
-            {/* Header */}
-            <div className="px-8 py-5 border-b border-gray-100 flex justify-between items-center bg-white shrink-0">
-              <h3 className="text-xl font-black text-gray-800">
-                Chỉnh sửa sản phẩm
-              </h3>
-              <button
-                onClick={() => setIsEditModalOpen(false)}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                <i className="fa-solid fa-xmark text-xl"></i>
-              </button>
-            </div>
+      {isCreateModalOpen && renderProductForm("create")}
+      {isEditModalOpen && editingProduct && renderProductForm("edit")}
 
-            {/* Form Body */}
-            <form
-              onSubmit={handleUpdateSubmit}
-              className="flex flex-col flex-1 overflow-hidden"
-            >
-              <div className="p-8 overflow-y-auto flex-1 custom-scrollbar">
-                <div className="space-y-6">
-                  {" "}
-                  {/* Tăng khoảng cách giữa các nhóm */}
-                  {/* 1. KHỐI ADMIN ONLY (Giữ nguyên, chỉ chỉnh lại chút label) */}
-                  <div className="bg-indigo-50 p-5 rounded-xl border border-indigo-100">
-                    <p className="text-xs font-black text-indigo-800 uppercase mb-3 flex items-center gap-2">
-                      <i className="fa-solid fa-user-shield"></i> Thông tin quản
-                      trị
-                    </p>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="text-[11px] font-bold text-gray-500 uppercase mb-1 block">
-                          Người bán (Seller ID)
-                        </label>
-                        <input
-                          disabled // Thường admin không nên sửa seller ID tùy tiện
-                          value={editingProduct.sellerId || ""}
-                          className="w-full px-3 py-2 border border-indigo-200 rounded-lg text-sm font-bold text-indigo-700 bg-white/50 cursor-not-allowed"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-[11px] font-bold text-gray-500 uppercase mb-1 block">
-                          Trạng thái (Status)
-                        </label>
-                        <select
-                          value={editingProduct.status}
-                          onChange={(e) =>
-                            setEditingProduct({
-                              ...editingProduct,
-                              status: e.target.value,
-                            })
-                          }
-                          className="w-full px-3 py-2 border border-indigo-200 rounded-lg text-sm font-bold bg-white focus:ring-2 focus:ring-indigo-500 outline-none"
-                        >
-                          {Object.values(ProductStatus).map((s) => (
-                            <option key={s} value={s}>
-                              {s}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                      <div>
-                        <label className="text-[11px] font-bold text-gray-500 uppercase mb-1 block">
-                          AI Status
-                        </label>
-                        <select
-                          value={editingProduct.aiStatus}
-                          onChange={(e) =>
-                            setEditingProduct({
-                              ...editingProduct,
-                              aiStatus: e.target.value,
-                            })
-                          }
-                          className={`w-full px-3 py-2 border border-indigo-200 rounded-lg text-sm font-bold bg-white outline-none ${
-                            editingProduct.aiStatus === "OK"
-                              ? "text-green-600"
-                              : "text-red-600"
-                          }`}
-                        >
-                          {AiStatusOptions.map((s) => (
-                            <option key={s} value={s}>
-                              {s}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                      <div>
-                        <label className="text-[11px] font-bold text-gray-500 uppercase mb-1 block">
-                          Ghi chú Admin (Lý do)
-                        </label>
-                        <input
-                          placeholder="VD: Vi phạm chính sách..."
-                          value={editingProduct.adminNote || ""}
-                          onChange={(e) =>
-                            setEditingProduct({
-                              ...editingProduct,
-                              adminNote: e.target.value,
-                            })
-                          }
-                          className="w-full px-3 py-2 border border-indigo-200 rounded-lg text-sm bg-white focus:ring-2 focus:ring-indigo-500 outline-none"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  {/* 2. THÔNG TIN SẢN PHẨM CƠ BẢN */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="col-span-2">
-                      <label className="text-sm font-bold text-gray-700 mb-1 block">
-                        Tiêu đề sản phẩm <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        placeholder="Nhập tên sản phẩm..."
-                        value={editingProduct.title || ""}
-                        onChange={(e) =>
-                          setEditingProduct({
-                            ...editingProduct,
-                            title: e.target.value,
-                          })
-                        }
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-medium"
-                      />
-                    </div>
+      <section className="rounded-[2rem] border border-slate-100 bg-white p-5 shadow-xl shadow-slate-900/5">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-5"><input type="text" placeholder="Từ khóa sản phẩm..." value={keyword} onChange={(e) => setKeyword(e.target.value)} className={`${fieldClass} xl:col-span-2`} /><select value={aiStatusFilter} onChange={(e) => setAiStatusFilter(e.target.value)} aria-label="Lọc theo AI Status" className={fieldClass}><option value="">Tất cả AI Status</option>{AiStatusOptions.map((s) => <option key={s} value={s}>{s}</option>)}</select><input type="text" placeholder="Category ID" value={categoryId} onChange={(e) => setCategoryId(e.target.value)} className={fieldClass} /><input type="text" placeholder="Seller ID" value={sellerId} onChange={(e) => setSellerId(e.target.value)} className={fieldClass} /></div>
+        <div className="mt-4 flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between"><div className="flex flex-wrap items-center gap-2"><span className="mr-1 text-xs font-black uppercase tracking-widest text-slate-400">Trạng thái</span>{Object.values(ProductStatus).map((status) => <button key={status} type="button" onClick={() => handleStatusFilterChange(status)} className={`rounded-full border px-4 py-2 text-xs font-black transition-all ${statusFilter.includes(status) ? "border-teal-500 bg-teal-500 text-white" : "border-slate-200 bg-slate-50 text-slate-500 hover:bg-white"}`}>{status}</button>)}</div><div className="flex items-center gap-3"><span className="text-xs font-black uppercase tracking-widest text-slate-400">{activeFilters} bộ lọc</span><select value={sortDir} onChange={(e) => setSortDir(e.target.value)} aria-label="Sắp xếp theo thời gian" className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-black text-slate-600 outline-none"><option value="DESC">Mới nhất</option><option value="ASC">Cũ nhất</option></select></div></div>
+      </section>
 
-                    <div>
-                      <label className="text-sm font-bold text-gray-700 mb-1 block">
-                        Giá bán (VNĐ) <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="number"
-                        placeholder="0"
-                        value={editingProduct.price || 0}
-                        onChange={(e) =>
-                          setEditingProduct({
-                            ...editingProduct,
-                            price: Number(e.target.value),
-                          })
-                        }
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-medium"
-                      />
-                    </div>
+      <section className="overflow-hidden rounded-[2rem] border border-slate-100 bg-white shadow-xl shadow-slate-900/5">
+        <div className="overflow-x-auto"><table className="w-full min-w-[980px] text-left"><thead className="border-b border-slate-100 bg-slate-50"><tr>{["Sản phẩm", "Giá", "Trạng thái", "AI", "Người bán", "Thao tác"].map((h) => <th key={h} className="px-6 py-5 text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">{h}</th>)}</tr></thead><tbody className="divide-y divide-slate-50">{loading ? <tr><td colSpan={6} className="px-6 py-16 text-center"><i className="fa-solid fa-circle-notch animate-spin text-3xl text-teal-500" /><p className="mt-3 text-xs font-black uppercase tracking-widest text-slate-400">Đang tải</p></td></tr> : products.length === 0 ? <tr><td colSpan={6} className="px-6 py-16 text-center text-sm font-bold text-slate-400">Không có sản phẩm phù hợp</td></tr> : products.map((p) => <tr key={p.id} className="transition hover:bg-slate-50/70"><td className="px-6 py-5"><div className="flex items-center gap-4">{p.imageUrls?.[0] ? <img src={getImageUrl(p.imageUrls[0])} className="h-14 w-14 rounded-2xl object-cover" alt={p.title} /> : <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-300"><i className="fa-solid fa-image" /></div>}<div className="max-w-[260px]"><p className="truncate text-sm font-black text-slate-950">{p.title}</p><p className="mt-1 truncate text-[10px] font-bold uppercase tracking-wider text-slate-400">#{p.id}</p></div></div></td><td className="px-6 py-5 text-sm font-black text-teal-700">{p.price.toLocaleString()}đ</td><td className="px-6 py-5"><select value={p.status} onChange={(e) => handleChangeStatus(p.id, e.target.value)} aria-label={`Trạng thái sản phẩm ${p.title}`} className={`rounded-xl border px-3 py-2 text-xs font-black outline-none ${getStatusTheme(p.status)}`}>{Object.values(ProductStatus).map((s) => <option key={s} value={s}>{s}</option>)}</select></td><td className="px-6 py-5"><span className={`rounded-full border px-3 py-1 text-xs font-black ${getAiTheme(p.aiStatus)}`}>{p.aiStatus || "PENDING"}</span></td><td className="px-6 py-5 text-sm font-bold text-slate-600">{p.sellerName}</td><td className="px-6 py-5"><div className="flex gap-2"><Link to={`/products/${p.id}`} className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-100 text-slate-500 transition hover:bg-slate-950 hover:text-white" title="Xem chi tiết"><i className="fa-solid fa-eye" /></Link><button onClick={() => openEditModal(p)} className="flex h-10 w-10 items-center justify-center rounded-2xl bg-teal-50 text-teal-700 transition hover:bg-teal-600 hover:text-white" title="Sửa sản phẩm"><i className="fa-solid fa-pen-to-square" /></button><button onClick={() => handleDeleteProduct(p.id)} className="flex h-10 w-10 items-center justify-center rounded-2xl bg-rose-50 text-rose-600 transition hover:bg-rose-600 hover:text-white" title="Xóa vĩnh viễn"><i className="fa-solid fa-trash-can" /></button></div></td></tr>)}</tbody></table></div>
+      </section>
 
-                    <div>
-                      <label className="text-sm font-bold text-gray-700 mb-1 block">
-                        Danh mục (Category ID)
-                      </label>
-                      <input
-                        placeholder="Nhập ID danh mục"
-                        value={editingProduct.categoryId || ""}
-                        onChange={(e) =>
-                          setEditingProduct({
-                            ...editingProduct,
-                            categoryId: e.target.value,
-                          })
-                        }
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-medium"
-                      />
-                    </div>
-
-                    <div className="col-span-2">
-                      <label className="text-sm font-bold text-gray-700 mb-1 block">
-                        Mô tả chi tiết
-                      </label>
-                      <textarea
-                        placeholder="Mô tả chi tiết về sản phẩm..."
-                        rows={6}
-                        value={editingProduct.description || ""}
-                        onChange={(e) =>
-                          setEditingProduct({
-                            ...editingProduct,
-                            description: e.target.value,
-                          })
-                        }
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none resize-y font-medium text-gray-600"
-                      />
-                    </div>
-                  </div>
-                  {/* 3. KHỐI ĐỊA CHỈ (Đã sửa lại rõ ràng) */}
-                  <div className="border-t border-gray-100 pt-5">
-                    <h4 className="text-sm font-black text-gray-800 uppercase mb-4 flex items-center gap-2">
-                      <i className="fa-solid fa-location-dot text-indigo-500"></i>{" "}
-                      Địa chỉ giao dịch
-                    </h4>
-                    <div className="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded-xl">
-                      {/* Ô 1: Tỉnh/Thành */}
-                      <div>
-                        <label className="text-xs font-bold text-gray-500 mb-1 block">
-                          Tỉnh / Thành phố
-                        </label>
-                        <input
-                          placeholder="VD: Hà Nội"
-                          value={editingProduct.city || ""}
-                          onChange={(e) =>
-                            setEditingProduct({
-                              ...editingProduct,
-                              city: e.target.value,
-                            })
-                          }
-                          className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:border-indigo-500 outline-none bg-white"
-                        />
-                      </div>
-
-                      {/* Ô 3: Phường/Xã */}
-                      <div>
-                        <label className="text-xs font-bold text-gray-500 mb-1 block">
-                          Phường / Xã
-                        </label>
-                        <input
-                          placeholder="VD: Láng Hạ"
-                          value={editingProduct.ward || ""}
-                          onChange={(e) =>
-                            setEditingProduct({
-                              ...editingProduct,
-                              ward: e.target.value,
-                            })
-                          }
-                          className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:border-indigo-500 outline-none bg-white"
-                        />
-                      </div>
-
-                      {/* Ô 4: Chi tiết */}
-                      <div>
-                        <label className="text-xs font-bold text-gray-500 mb-1 block">
-                          Số nhà / Tên đường
-                        </label>
-                        <input
-                          placeholder="VD: Số 15 ngõ 99"
-                          value={editingProduct.addressDetail || ""}
-                          onChange={(e) =>
-                            setEditingProduct({
-                              ...editingProduct,
-                              addressDetail: e.target.value,
-                            })
-                          }
-                          className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:border-indigo-500 outline-none bg-white"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-xs font-bold text-gray-500 mb-1 block">
-                          Latitude
-                        </label>
-                        <input
-                          type="number"
-                          step="any"
-                          value={editingProduct.latitude || ""}
-                          onChange={(e) =>
-                            setEditingProduct({
-                              ...editingProduct,
-                              latitude: e.target.value,
-                            })
-                          }
-                          className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:border-indigo-500 outline-none bg-white"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="text-xs font-bold text-gray-500 mb-1 block">
-                          Longitude
-                        </label>
-                        <input
-                          type="number"
-                          step="any"
-                          value={editingProduct.longitude || ""}
-                          onChange={(e) =>
-                            setEditingProduct({
-                              ...editingProduct,
-                              longitude: e.target.value,
-                            })
-                          }
-                          className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:border-indigo-500 outline-none bg-white"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Footer */}
-              <div className="px-8 py-5 border-t border-gray-100 bg-gray-50 flex justify-end gap-3 shrink-0">
-                <button
-                  type="button"
-                  onClick={() => setIsEditModalOpen(false)}
-                  className="px-6 py-2.5 rounded-xl border border-gray-300 font-bold text-gray-700 hover:bg-gray-100"
-                >
-                  Hủy
-                </button>
-                <button
-                  type="submit"
-                  className="px-6 py-2.5 rounded-xl bg-indigo-600 font-bold text-white hover:bg-indigo-700 shadow-lg shadow-indigo-200 active:scale-95 transition-all"
-                >
-                  Lưu thay đổi
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      <div className="bg-white p-8 rounded-[40px] border border-gray-100 shadow-sm space-y-6">
-        {/* Search & Filters */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <input
-            type="text"
-            placeholder="Từ khóa..."
-            value={keyword}
-            onChange={(e) => setKeyword(e.target.value)}
-            className="px-6 py-4 bg-gray-50 border border-gray-200 rounded-2xl text-sm font-medium"
-          />
-          <select
-            value={aiStatusFilter}
-            onChange={(e) => setAiStatusFilter(e.target.value)}
-            aria-label="Lọc theo AI Status"
-            className="px-6 py-4 bg-gray-50 border border-gray-200 rounded-2xl text-sm font-bold"
-          >
-            <option value="">AI Status</option>
-            {AiStatusOptions.map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
-            ))}
-          </select>
-          <input
-            type="text"
-            placeholder="Category ID..."
-            value={categoryId}
-            onChange={(e) => setCategoryId(e.target.value)}
-            className="px-6 py-4 bg-gray-50 border border-gray-200 rounded-2xl text-sm font-medium"
-          />
-          <input
-            type="text"
-            placeholder="Seller ID..."
-            value={sellerId}
-            onChange={(e) => setSellerId(e.target.value)}
-            className="px-6 py-4 bg-gray-50 border border-gray-200 rounded-2xl text-sm font-medium"
-          />
-        </div>
-
-        {/* Status Multi-filter */}
-        <div className="flex flex-wrap gap-3">
-          <span className="text-xs font-bold text-gray-400 uppercase self-center">
-            Trạng thái:
-          </span>
-          {Object.values(ProductStatus).map((status) => (
-            <label
-              key={status}
-              className="flex items-center gap-2 cursor-pointer"
-            >
-              <input
-                type="checkbox"
-                checked={statusFilter.includes(status)}
-                onChange={() => handleStatusFilterChange(status)}
-                className="w-4 h-4 rounded border-gray-300 text-indigo-600"
-                aria-label={`Lọc theo trạng thái ${status}`}
-              />
-              <span className="text-sm font-medium text-gray-700">
-                {status}
-              </span>
-            </label>
-          ))}
-        </div>
-
-        {/* Sort */}
-        <div className="flex items-center gap-4">
-          <span className="text-xs font-bold text-gray-400 uppercase">
-            Sắp xếp:
-          </span>
-          <select
-            value={sortDir}
-            onChange={(e) => setSortDir(e.target.value)}
-            aria-label="Sắp xếp theo thời gian"
-            className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold"
-          >
-            <option value="DESC">Mới nhất</option>
-            <option value="ASC">Cũ nhất</option>
-          </select>
-        </div>
-      </div>
-
-      {/* Table */}
-      <div className="bg-white rounded-[40px] border border-gray-100 overflow-hidden shadow-sm overflow-x-auto">
-        <table className="w-full text-left">
-          <thead className="bg-gray-50 border-b border-gray-100">
-            <tr>
-              <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                Sản phẩm
-              </th>
-              <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                Giá
-              </th>
-              <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                Trạng thái
-              </th>
-              <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                AI Status
-              </th>
-              <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                Người bán
-              </th>
-              <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                Thao tác
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-50">
-            {loading ? (
-              <tr>
-                <td colSpan={6} className="px-8 py-5 text-center text-gray-400">
-                  Đang tải...
-                </td>
-              </tr>
-            ) : products.length === 0 ? (
-              <tr>
-                <td colSpan={6} className="px-8 py-5 text-center text-gray-400">
-                  Không có sản phẩm
-                </td>
-              </tr>
-            ) : (
-              products.map((p) => (
-                <tr key={p.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-8 py-5">
-                    <div className="flex items-center gap-4">
-                      {p.imageUrls && p.imageUrls[0] && (
-                        <img
-                          src={getImageUrl(p.imageUrls[0])}
-                          className="w-12 h-12 rounded-2xl object-cover"
-                          alt="product"
-                        />
-                      )}
-                      <div className="max-w-[200px]">
-                        <p className="text-sm font-black text-gray-900 truncate">
-                          {p.title}
-                        </p>
-                        <p className="text-[9px] text-gray-400 font-bold uppercase tracking-tighter">
-                          #{p.id}
-                        </p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-8 py-5 text-sm font-black text-indigo-600">
-                    {p.price.toLocaleString()}đ
-                  </td>
-                  <td className="px-8 py-5">
-                    <select
-                      value={p.status}
-                      onChange={(e) => handleChangeStatus(p.id, e.target.value)}
-                      aria-label={`Trạng thái sản phẩm ${p.title}`}
-                      className="px-3 py-1 bg-gray-100 border border-gray-200 rounded-lg text-xs font-bold"
-                    >
-                      {Object.values(ProductStatus).map((s) => (
-                        <option key={s} value={s}>
-                          {s}
-                        </option>
-                      ))}
-                    </select>
-                  </td>
-                  <td className="px-8 py-5">
-                    <span
-                      className={`px-3 py-1 rounded-lg text-xs font-bold ${
-                        p.aiStatus === "OK"
-                          ? "bg-green-100 text-green-700"
-                          : p.aiStatus === "WARNING"
-                            ? "bg-yellow-100 text-yellow-700"
-                            : p.aiStatus === "SCAM"
-                              ? "bg-red-100 text-red-700"
-                              : p.aiStatus === "SPAM"
-                                ? "bg-orange-100 text-orange-700"
-                                : "bg-gray-100 text-gray-700"
-                      }`}
-                    >
-                      {p.aiStatus}
-                    </span>
-                  </td>
-                  <td className="px-8 py-5 text-sm font-medium text-gray-700">
-                    {p.sellerName}
-                  </td>
-                  <td className="px-8 py-5 flex gap-2">
-                    <Link
-                      to={`/products/${p.id}`}
-                      className="w-10 h-10 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-400 hover:bg-indigo-600 hover:text-white transition-colors"
-                      title="Xem chi tiết"
-                    >
-                      <i className="fa-solid fa-eye"></i>
-                    </Link>
-                    <button
-                      onClick={() => openEditModal(p)}
-                      className="w-10 h-10 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600 hover:bg-indigo-600 hover:text-white transition-colors"
-                      title="Sửa sản phẩm"
-                    >
-                      <i className="fa-solid fa-pen-to-square"></i>
-                    </button>
-                    <button
-                      onClick={() => handleDeleteProduct(p.id)}
-                      className="w-10 h-10 bg-red-50 rounded-2xl flex items-center justify-center text-red-600 hover:bg-red-600 hover:text-white transition-all shadow-sm hover:shadow-red-200"
-                      title="Xóa vĩnh viễn"
-                    >
-                      <i className="fa-solid fa-trash-can"></i>
-                    </button>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Pagination */}
-      <div className="flex items-center justify-between">
-        <p className="text-sm font-bold text-gray-600">
-          Trang {meta.page} / {meta.pages} ({meta.total} sản phẩm)
-        </p>
-        <div className="flex gap-2">
-          <button
-            onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-            disabled={currentPage === 1}
-            className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl font-bold text-gray-700 hover:bg-gray-100 disabled:opacity-50"
-          >
-            Trước
-          </button>
-          {Array.from({ length: meta.pages }, (_, i) => i + 1).map((page) => (
-            <button
-              key={page}
-              onClick={() => setCurrentPage(page)}
-              className={`px-3 py-2 rounded-xl font-bold ${
-                currentPage === page
-                  ? "bg-indigo-600 text-white"
-                  : "bg-gray-50 border border-gray-200 text-gray-700 hover:bg-gray-100"
-              }`}
-            >
-              {page}
-            </button>
-          ))}
-          <button
-            onClick={() =>
-              setCurrentPage((prev) => Math.min(meta.pages, prev + 1))
-            }
-            disabled={currentPage === meta.pages}
-            className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl font-bold text-gray-700 hover:bg-gray-100 disabled:opacity-50"
-          >
-            Sau
-          </button>
-        </div>
-      </div>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><p className="text-sm font-bold text-slate-500">Trang <span className="text-teal-700">{meta.page}</span> / {meta.pages} ({meta.total} sản phẩm)</p><div className="flex flex-wrap gap-2"><button onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))} disabled={currentPage === 1} className="rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-black text-slate-600 hover:bg-slate-50 disabled:opacity-40">Trước</button>{Array.from({ length: meta.pages }, (_, i) => i + 1).slice(0, 7).map((page) => <button key={page} onClick={() => setCurrentPage(page)} className={`rounded-2xl px-4 py-2 text-sm font-black ${currentPage === page ? "bg-teal-600 text-white" : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"}`}>{page}</button>)}<button onClick={() => setCurrentPage((prev) => Math.min(meta.pages, prev + 1))} disabled={currentPage === meta.pages} className="rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-black text-slate-600 hover:bg-slate-50 disabled:opacity-40">Sau</button></div></div>
     </div>
   );
 };

@@ -1,4 +1,4 @@
-export interface Message {
+﻿export interface Message {
   id: string;
   senderId: string;
   content: string;
@@ -14,4 +14,11 @@ export interface ConversationDetails {
   productTitle: string;
   productImage: string | null;
   productPrice: number;
+  buyerId?: string;
+  buyerName?: string;
+  sellerId?: string;
+  sellerName?: string;
 }
+
+
+

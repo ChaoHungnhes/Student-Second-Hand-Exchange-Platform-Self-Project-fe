@@ -51,6 +51,7 @@ const ConversationPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
+  const isAdminView = Boolean(location.state?.adminView || location.state?.conversationDetails?.buyerId);
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [details, setDetails] = useState<ConversationDetails | null>(
@@ -65,6 +66,11 @@ const ConversationPage: React.FC = () => {
   const [transactionId, setTransactionId] = useState<string | null>(null);
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [hasReviewed, setHasReviewed] = useState(false);
+
+  const isParticipant = Boolean(
+    user?.id &&
+      (isAdminView || !details?.buyerId || String(details.buyerId) === String(user.id) || String(details.sellerId) === String(user.id)),
+  );
 
   const clientRef = useRef<Client | null>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -235,7 +241,7 @@ const ConversationPage: React.FC = () => {
   };
 
   const sendMessage = () => {
-    if (chatClosed || !input.trim() || !connected) return;
+    if (chatClosed || !isParticipant || !input.trim() || !connected) return;
 
     shouldAutoScrollRef.current = true;
 
@@ -344,45 +350,55 @@ const ConversationPage: React.FC = () => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto h-[calc(100vh-120px)] flex flex-col bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100 my-4">
-      <ChatHeader
-        chatClosed={chatClosed}
-        confirming={confirming}
-        details={details}
-        hasReviewed={hasReviewed}
-        isOwner={isOwner}
-        partnerOnline={partnerOnline}
-        transactionId={transactionId}
-        getImageUrl={getImageUrl}
-        onBack={() => navigate(-1)}
-        onConfirmTransaction={handleConfirmTransaction}
-        onOpenProduct={(productId) => navigate(`/products/${productId}`)}
-        onOpenReview={() => setShowReviewModal(true)}
-      />
+    <div className="relative -mx-4 -mt-8 flex min-h-[calc(100vh-80px)] items-center justify-center overflow-hidden bg-[radial-gradient(circle_at_top_left,rgba(153,246,228,0.28),transparent_34%),linear-gradient(180deg,#f8fafc,#ffffff)] px-4 py-6 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
+      <div className="pointer-events-none absolute right-0 top-20 h-72 w-72 rounded-full bg-amber-200/25 blur-3xl"></div>
+      <div className="pointer-events-none absolute -left-24 bottom-12 h-80 w-80 rounded-full bg-teal-200/25 blur-3xl"></div>
 
-      {chatClosed && (
-        <div className="bg-green-50 text-green-800 text-sm font-bold text-center py-3 border-b border-green-100 flex items-center justify-center gap-2">
-          <i className="fa-solid fa-circle-check text-green-600 text-lg"></i>
-          Giao dịch đã hoàn thành thành công!
-        </div>
-      )}
+      <div className="relative flex h-[calc(100vh-128px)] w-full max-w-5xl flex-col overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-[0_28px_80px_rgba(15,23,42,0.16)] sm:rounded-[2.5rem]">
+        <ChatHeader
+          chatClosed={chatClosed}
+          confirming={confirming}
+          details={details}
+          hasReviewed={hasReviewed}
+          isOwner={isOwner}
+          isAdminView={isAdminView}
+          partnerOnline={partnerOnline}
+          transactionId={transactionId}
+          getImageUrl={getImageUrl}
+          onBack={() => navigate(-1)}
+          onConfirmTransaction={handleConfirmTransaction}
+          onOpenProduct={(productId) => navigate(`/products/${productId}`)}
+          onOpenReview={() => setShowReviewModal(true)}
+        />
 
-      <ChatMessages
-        connected={connected}
-        currentUserId={user.id}
-        messages={messages}
-        messagesContainerRef={messagesContainerRef}
-        onScroll={handleMessagesScroll}
-        formatTimeDisplay={formatTimeDisplay}
-      />
+        {chatClosed && (
+          <div className="flex items-center justify-center gap-2 border-b border-emerald-100 bg-emerald-50 py-3 text-center text-sm font-black text-emerald-800">
+            <i className="fa-solid fa-circle-check text-emerald-600 text-lg"></i>
+            Giao dịch đã hoàn thành thành công!
+          </div>
+        )}
 
-      <ChatInput
-        chatClosed={chatClosed}
-        connected={connected}
-        input={input}
-        onInputChange={setInput}
-        onSend={sendMessage}
-      />
+        <ChatMessages
+          connected={connected}
+          currentUserId={user.id}
+          isAdminView={isAdminView}
+          buyerId={details?.buyerId}
+          sellerId={details?.sellerId}
+          messages={messages}
+          messagesContainerRef={messagesContainerRef}
+          onScroll={handleMessagesScroll}
+          formatTimeDisplay={formatTimeDisplay}
+        />
+
+        <ChatInput
+          chatClosed={chatClosed}
+          connected={connected}
+          canSendMessage={isParticipant && !isAdminView}
+          input={input}
+          onInputChange={setInput}
+          onSend={sendMessage}
+        />
+      </div>
 
       <ReviewModal
         isOpen={showReviewModal}
@@ -395,3 +411,9 @@ const ConversationPage: React.FC = () => {
 };
 
 export default ConversationPage;
+
+
+
+
+
+
