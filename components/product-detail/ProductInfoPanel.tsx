@@ -5,6 +5,7 @@ import { Product } from "../../types/index";
 interface ProductInfoPanelProps {
   canEdit: boolean;
   canManage: boolean;
+  canDelete: boolean;
   isAdmin: boolean;
   isOwner: boolean;
   isSold: boolean;
@@ -26,6 +27,7 @@ const getStatusClassName = (status: string) => {
 const ProductInfoPanel: React.FC<ProductInfoPanelProps> = ({
   canEdit,
   canManage,
+  canDelete,
   isAdmin,
   isOwner,
   isSold,
@@ -95,7 +97,7 @@ const ProductInfoPanel: React.FC<ProductInfoPanelProps> = ({
           <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400"><i className="fa-solid fa-gear mr-1"></i> {isAdmin && !isOwner ? "Quyền quản trị" : "Quản lý tin đăng"}</p>
           <div className="grid grid-cols-2 gap-4">
             <button disabled={!canEdit} onClick={onEdit} className={`flex items-center justify-center gap-2 rounded-2xl py-4 text-sm font-black shadow-lg transition ${canEdit ? "bg-slate-950 text-white shadow-slate-200 hover:bg-black active:scale-95" : "cursor-not-allowed bg-slate-100 text-slate-400 opacity-60"}`}><i className={`fa-solid ${canEdit ? "fa-pen" : "fa-lock"}`}></i>{canEdit ? "Chỉnh sửa" : "Đang khóa sửa"}</button>
-            <button disabled={isSold} onClick={onDelete} className={`flex items-center justify-center gap-2 rounded-2xl py-4 text-sm font-black transition ${!isSold ? "border-2 border-rose-100 bg-white text-rose-600 hover:bg-rose-50" : "bg-slate-50 text-slate-300"}`}><i className="fa-solid fa-trash-can"></i> Gỡ tin</button>
+            <button disabled={!canDelete} onClick={onDelete} className={`flex items-center justify-center gap-2 rounded-2xl py-4 text-sm font-black transition ${canDelete ? "border-2 border-rose-100 bg-white text-rose-600 hover:bg-rose-50" : "bg-slate-50 text-slate-300"}`}><i className="fa-solid fa-trash-can"></i> Gỡ tin</button>
           </div>
           {isOwner && product.status === "APPROVED" && <button className="w-full rounded-2xl border border-orange-100 bg-orange-50 py-4 text-sm font-black text-orange-700 transition hover:bg-orange-100"><i className="fa-solid fa-check-double mr-2"></i> Đánh dấu đã bán</button>}
         </div>

@@ -31,7 +31,7 @@ const PageLoader: React.FC = () => (
     <div className="rounded-[2rem] border border-slate-200 bg-white px-8 py-6 text-center shadow-xl shadow-slate-900/5">
       <i className="fa-solid fa-circle-notch animate-spin text-3xl text-teal-500"></i>
       <p className="mt-3 text-sm font-black uppercase tracking-[0.18em] text-slate-400">
-        �ang t?i
+        Đang tải
       </p>
     </div>
   </div>
@@ -60,7 +60,7 @@ const App: React.FC = () => {
                 />
                 <Route path="/products/:id" element={<ProductDetailPage />} />
 
-                {/* Private Routes (Ph?i dang nh?p m?i v�o du?c) */}
+                {/* Private Routes (Phải đăng nhập mới vào được) */}
                 <Route
                   path="/profile"
                   element={
@@ -155,4 +155,6 @@ const App: React.FC = () => {
 };
 
 export default App;
+
+
 

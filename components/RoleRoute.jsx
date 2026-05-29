@@ -3,8 +3,8 @@ import React from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
-export default function RoleRoute({ allowed = [], children }) {
-  const { user, loading } = useAuth();
+export default function RoleRoute({ allowed = [], permissions = [], anyPermission = [], children }) {
+  const { user, loading, hasAnyRole, hasAnyPermission } = useAuth();
 
   // THÊM DÒNG NÀY: Đợi load xong thông tin User mới kiểm tra quyền
   if (loading) {
@@ -22,7 +22,8 @@ export default function RoleRoute({ allowed = [], children }) {
     allowedRoles: allowed 
   });
 
-  const ok = user?.roles?.some(r => allowed.includes(r)) ?? false;
+  const requiredPermissions = permissions.length ? permissions : anyPermission;
+  const ok = (allowed.length > 0 && hasAnyRole(allowed)) || (requiredPermissions.length > 0 && hasAnyPermission(requiredPermissions));
 
   if (!ok) {
     console.warn("Truy cập bị từ chối: User không có quyền phù hợp");

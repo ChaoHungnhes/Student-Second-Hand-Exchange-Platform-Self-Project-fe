@@ -43,7 +43,7 @@ const PostProductPage: React.FC = () => {
   const [isReverseGeocoding, setIsReverseGeocoding] = useState(false);
   const [mapVisible, setMapVisible] = useState(false);
   const [mapCenter, setMapCenter] = useState<[number, number]>(
-    getCityCenter("H� N?i"),
+    getCityCenter("Hà Nội"),
   );
 
   const [formData, setFormData] = useState<PostProductFormData>({
@@ -51,7 +51,7 @@ const PostProductPage: React.FC = () => {
     description: "",
     price: "",
     categoryId: "",
-    city: "H� N?i",
+    city: "Hà Nội",
     ward: "",
     addressDetail: "",
     latitude: "",
@@ -133,7 +133,7 @@ const PostProductPage: React.FC = () => {
   const handleLocateFromWard = async () => {
     if (!canOpenMap) {
       alert(
-        "Vui l�ng nh?p d? th�nh ph? v� phu?ng/x� tru?c khi ch?n v? tr� chi ti?t.",
+        "Vui lòng nhập đủ thành phố và phường/xã trước khi chọn vị trí chi tiết.",
       );
       return;
     }
@@ -149,7 +149,7 @@ const PostProductPage: React.FC = () => {
       const data = res?.data?.data || res?.data || res;
 
       if (!data?.latitude || !data?.longitude) {
-        throw new Error("Kh�ng t�m th?y t?a d?");
+        throw new Error("Không tìm thấy tọa độ");
       }
 
       const nextCity = normalizeCity(data.city || formData.city);
@@ -169,10 +169,10 @@ const PostProductPage: React.FC = () => {
       setMapCenter(nextPosition);
       setMapVisible(true);
     } catch (error) {
-      console.error("L?i d?nh v? t? d?a ch?:", error);
+      console.error("Lỗi định vị từ địa chỉ:", error);
       showApiErrorAlert(
         error,
-        "Kh�ng t�m th?y khu v?c t? th�ng tin th�nh ph? v� phu?ng/x�. B?n ki?m tra l?i t�n ward nh�.",
+        "Không tìm thấy tọa độ",
       );
     } finally {
       setIsLocating(false);
@@ -197,7 +197,7 @@ const PostProductPage: React.FC = () => {
       }));
       setMapCenter([lat, lng]);
     } catch (error) {
-      console.error("L?i l?y d?a ch? t? b?n d?:", error);
+      console.error("Lỗi định vị từ địa chỉ:", error);
       setFormData((prev) => ({
         ...prev,
         latitude: String(lat),
@@ -206,7 +206,7 @@ const PostProductPage: React.FC = () => {
       setMapCenter([lat, lng]);
       showApiErrorAlert(
         error,
-        "�� c?p nh?t t?a d?, nhung chua l?y du?c d?a ch? chi ti?t t? v? tr� n�y.",
+        "Đã cập nhật tọa độ, nhưng chưa lấy được địa chỉ chi tiết từ vị trí này.",
       );
     } finally {
       setIsReverseGeocoding(false);
@@ -217,7 +217,7 @@ const PostProductPage: React.FC = () => {
     e.preventDefault();
 
     if (!formData.latitude || !formData.longitude) {
-      alert("B?n c?n ch?n v? tr� chi ti?t tr�n b?n d? tru?c khi ti?p t?c.");
+      alert("Bạn cần chọn vị trí chi tiết trên bản đồ trước khi tiếp tục.");
       return;
     }
 
@@ -242,8 +242,8 @@ const PostProductPage: React.FC = () => {
         setStep("IMAGES");
       }
     } catch (error) {
-      console.error("L?i t?o b?n nh�p:", error);
-      showApiErrorAlert(error, "C� l?i x?y ra khi t?o tin dang. Vui l�ng th? l?i.");
+      console.error("Lỗi tạo bản nháp:", error);
+      showApiErrorAlert(error, "Có lỗi xảy ra khi tạo tin đăng. Vui lòng thử lại.");
     } finally {
       setIsLoading(false);
     }
@@ -266,8 +266,8 @@ const PostProductPage: React.FC = () => {
       await submitProductAPI(draftId);
       setStep("SUCCESS");
     } catch (error) {
-      console.error("L?i upload/submit:", error);
-      showApiErrorAlert(error, "�ang tin th?t b?i ? bu?c cu?i. Vui l�ng th? l?i.");
+      console.error("Lỗi upload/submit:", error);
+      showApiErrorAlert(error, "Đăng tin thất bại ở bước cuối. Vui lòng thử lại.");
       setStep("IMAGES");
     }
   };
@@ -323,3 +323,5 @@ const PostProductPage: React.FC = () => {
 };
 
 export default PostProductPage;
+
+

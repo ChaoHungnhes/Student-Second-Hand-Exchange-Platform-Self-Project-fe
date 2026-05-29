@@ -4,7 +4,10 @@ export interface User {
   id?: string;
   name: string;
   email: string;
+  role?: string;
   roles: string[];
+  authorities?: string[];
+  permissions?: string[];
   avatar?: string;
   status?: string;
   rating?: number;

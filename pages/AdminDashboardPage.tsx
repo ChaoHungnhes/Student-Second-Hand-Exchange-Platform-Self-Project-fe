@@ -79,12 +79,16 @@ const adminTabs: Array<{
 ];
 
 const AdminDashboardPage: React.FC = () => {
-  const { user: currentUser } = useAuth();
+  const { user: currentUser, hasAnyPermission, isAdmin, isManager } = useAuth();
   const [activeTab, setActiveTab] = useState<AdminTab>("OVERVIEW");
-  const activeTabInfo =
-    adminTabs.find((tab) => tab.id === activeTab) ?? adminTabs[0];
+  const tabPermissions: Record<AdminTab, string[]> = {
+    OVERVIEW: ["dashboard:read"], MODERATION: ["product:approve", "product:reject"], PRODUCTS: ["product:read"], CATEGORIES: ["category:read", "category:create", "category:update", "category:delete"], USERS: ["user:read"], TRANSACTIONS: ["transaction:read"], CONVERSATIONS: ["conversation:read"], NOTIFICATIONS: ["notification:read"], REPORTS: ["report:read"], AUDIT_LOGS: ["audit:read"]
+  };
+  const visibleTabs = adminTabs.filter((tab) => isAdmin || hasAnyPermission(tabPermissions[tab.id]));
+  const safeActiveTab = visibleTabs.some((tab) => tab.id === activeTab) ? activeTab : visibleTabs[0]?.id;
+  const activeTabInfo = adminTabs.find((tab) => tab.id === safeActiveTab) ?? adminTabs[0];
 
-  if (!currentUser?.roles?.some((role) => [UserRole.ADMIN, "MANAGER"].includes(role as UserRole | "MANAGER"))) {
+  if (!isAdmin && !isManager) {
     return (
       <div className="relative mx-auto mt-12 max-w-xl overflow-hidden rounded-[2rem] border border-rose-100 bg-white p-10 text-center shadow-2xl shadow-rose-100">
         <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-3xl bg-rose-50 text-rose-500">
@@ -158,8 +162,8 @@ const AdminDashboardPage: React.FC = () => {
             </div>
 
             <nav className="grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-1">
-              {adminTabs.map((item) => {
-                const isActive = activeTab === item.id;
+              {visibleTabs.map((item) => {
+                const isActive = safeActiveTab === item.id;
                 return (
                   <button
                     key={item.id}
@@ -205,16 +209,16 @@ const AdminDashboardPage: React.FC = () => {
             </div>
           </div>
 
-          {activeTab === "OVERVIEW" && <AdminOverview />}
-          {activeTab === "MODERATION" && <AdminModeration />}
-          {activeTab === "PRODUCTS" && <AdminProductManagement />}
-          {activeTab === "CATEGORIES" && <AdminCategoryManagement />}
-          {activeTab === "USERS" && <AdminUserManagement />}
-          {activeTab === "TRANSACTIONS" && <AdminTransactions />}
-          {activeTab === "CONVERSATIONS" && <AdminConversations />}
-          {activeTab === "NOTIFICATIONS" && <AdminNotifications />}
-          {activeTab === "REPORTS" && <AdminReports />}
-          {activeTab === "AUDIT_LOGS" && <AdminAuditLogs />}
+          {safeActiveTab === "OVERVIEW" && <AdminOverview />}
+          {safeActiveTab === "MODERATION" && <AdminModeration />}
+          {safeActiveTab === "PRODUCTS" && <AdminProductManagement />}
+          {safeActiveTab === "CATEGORIES" && <AdminCategoryManagement />}
+          {safeActiveTab === "USERS" && <AdminUserManagement />}
+          {safeActiveTab === "TRANSACTIONS" && <AdminTransactions />}
+          {safeActiveTab === "CONVERSATIONS" && <AdminConversations />}
+          {safeActiveTab === "NOTIFICATIONS" && <AdminNotifications />}
+          {safeActiveTab === "REPORTS" && <AdminReports />}
+          {safeActiveTab === "AUDIT_LOGS" && <AdminAuditLogs />}
         </main>
       </div>
     </div>
@@ -222,6 +226,9 @@ const AdminDashboardPage: React.FC = () => {
 };
 
 export default AdminDashboardPage;
+
+
+
 
 
 

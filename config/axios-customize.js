@@ -83,12 +83,19 @@ instance.interceptors.response.use(
         refreshPromise = null;
       }
     }
-    error.apiMessage = getApiErrorMessage(error);
+    if (error.response?.status === 403) {
+      error.apiMessage = "Bạn không có quyền thực hiện thao tác này";
+    } else {
+      error.apiMessage = getApiErrorMessage(error);
+    }
     error.apiCode =
       error.response?.data?.resultCode ||
       error.response?.data?.code ||
       error.response?.data?.errorCode;
 
+    if (error.response?.status === 401 && !isAuthEndpointWithoutRefresh(original.url)) {
+      window.dispatchEvent(new Event("AUTH_UNAUTHORIZED"));
+    }
     return Promise.reject(error);
   }
 );

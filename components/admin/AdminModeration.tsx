@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { AIStatus, Product } from "../../types";
 import { Category } from "../../types/index";
@@ -10,6 +10,7 @@ import {
   rejectProductAPI,
 } from "../../config/api";
 import { getImageUrl } from "../../utils/imageHelper";
+import { useAuth } from "../../context/AuthContext";
 
 const PAGE_SIZE = 8;
 
@@ -44,6 +45,7 @@ const getAiTheme = (status?: string) => {
 };
 
 const AdminModeration: React.FC = () => {
+  const { hasPermission } = useAuth();
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
@@ -245,7 +247,7 @@ const AdminModeration: React.FC = () => {
                     </div>
                     <div className="absolute bottom-4 left-4 right-4 rounded-2xl bg-white/90 p-3 backdrop-blur">
                       <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Giá đề xuất</p>
-                      <p className="text-2xl font-black tracking-tight text-slate-950">{p.price.toLocaleString()}đ</p>
+                      <p className="text-2xl font-black tracking-tight text-slate-950">{p.price.toLocaleString()}d</p>
                     </div>
                   </div>
 
@@ -274,15 +276,15 @@ const AdminModeration: React.FC = () => {
                     </div>
 
                     <div className="flex flex-wrap items-center gap-3 pt-1">
-                      <button onClick={() => openActionModal(p, "APPROVE")} className="inline-flex items-center gap-2 rounded-2xl bg-emerald-500 px-6 py-3 text-xs font-black uppercase tracking-[0.16em] text-white shadow-lg shadow-emerald-100 transition-all hover:-translate-y-0.5 hover:bg-emerald-600 active:scale-95">
+                      {hasPermission("product:approve") && <button onClick={() => openActionModal(p, "APPROVE") } className="inline-flex items-center gap-2 rounded-2xl bg-emerald-500 px-6 py-3 text-xs font-black uppercase tracking-[0.16em] text-white shadow-lg shadow-emerald-100 transition-all hover:-translate-y-0.5 hover:bg-emerald-600 active:scale-95">
                         <i className="fa-solid fa-check" /> Duyệt
-                      </button>
-                      <button onClick={() => openActionModal(p, "REJECT")} className="inline-flex items-center gap-2 rounded-2xl bg-rose-50 px-6 py-3 text-xs font-black uppercase tracking-[0.16em] text-rose-600 transition-all hover:-translate-y-0.5 hover:bg-rose-100 active:scale-95">
+                      </button>}
+                      {hasPermission("product:reject") && <button onClick={() => openActionModal(p, "REJECT") } className="inline-flex items-center gap-2 rounded-2xl bg-rose-50 px-6 py-3 text-xs font-black uppercase tracking-[0.16em] text-rose-600 transition-all hover:-translate-y-0.5 hover:bg-rose-100 active:scale-95">
                         <i className="fa-solid fa-xmark" /> Từ chối
-                      </button>
-                      <button onClick={() => handleDelete(p.id)} className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-400 transition-all hover:bg-rose-500 hover:text-white" title="Xóa vĩnh viễn">
+                      </button>}
+                      {hasPermission("product:delete") && <button onClick={() => handleDelete(p.id)} className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-400 transition-all hover:bg-rose-500 hover:text-white" title="Xóa vĩnh viễn">
                         <i className="fa-solid fa-trash-can text-sm" />
-                      </button>
+                      </button>}
                     </div>
                   </div>
                 </div>
@@ -347,3 +349,4 @@ const AdminModeration: React.FC = () => {
 };
 
 export default AdminModeration;
+

@@ -1,5 +1,6 @@
 ﻿import React, { useEffect, useMemo, useState } from "react";
 import { User, UserRole, UserStatus } from "../../types";
+import { useAuth } from "../../context/AuthContext";
 import {
   createUserAPI,
   deleteUserAPI,
@@ -25,6 +26,13 @@ const getRoleTheme = (role?: UserRole) =>
     ? "border-rose-100 bg-rose-50 text-rose-700"
     : "border-sky-100 bg-sky-50 text-sky-700";
 
+const ROLE_LEVEL: Record<string, number> = { ADMIN: 1, MANAGER: 2, USER: 3 };
+
+const canManageUser = (currentRole?: string, targetRole?: string) => {
+  if (!currentRole || !targetRole) return false;
+  return (ROLE_LEVEL[currentRole] ?? 99) < (ROLE_LEVEL[targetRole] ?? 99);
+};
+
 const getStatusTheme = (status?: UserStatus) => {
   if (status === UserStatus.ACTIVE) return "border-emerald-100 bg-emerald-50 text-emerald-700";
   if (status === UserStatus.BLOCKED) return "border-rose-100 bg-rose-50 text-rose-700";
@@ -34,6 +42,7 @@ const getStatusTheme = (status?: UserStatus) => {
 };
 
 const AdminUserManagement: React.FC<Props> = ({ users: initialUsers = [] }) => {
+  const { user: currentUser, hasPermission, isAdmin } = useAuth();
   const [keyword, setKeyword] = useState("");
   const [statusFilter, setStatusFilter] = useState<"ALL" | UserStatus>("ALL");
   const [sortBy, setSortBy] = useState<"createdAt" | "rating">("createdAt");
@@ -161,6 +170,9 @@ const AdminUserManagement: React.FC<Props> = ({ users: initialUsers = [] }) => {
   };
 
   const activeCount = useMemo(() => users.filter((u) => u.status === UserStatus.ACTIVE).length, [users]);
+  const currentRole = currentUser?.role || currentUser?.roles?.[0];
+  const roleOptions = isAdmin ? [UserRole.USER, UserRole.MANAGER] : [UserRole.USER];
+  const canManageTarget = (target?: User | null) => canManageUser(currentRole, target?.role);
 
   const renderUserModal = (mode: "create" | "edit") => {
     const isCreate = mode === "create";
@@ -196,14 +208,14 @@ const AdminUserManagement: React.FC<Props> = ({ users: initialUsers = [] }) => {
             {isCreate && <div><label className={labelClass}>Mật khẩu</label><input type="password" value={userData.password || ""} onChange={(e) => setData((p: any) => ({ ...p, password: e.target.value }))} className={fieldClass} placeholder="Mật khẩu đăng nhập" /></div>}
             {!isCreate && <div><label className={labelClass}>Email</label><input disabled value={userData.email || ""} className={`${fieldClass} cursor-not-allowed bg-slate-100 text-slate-400`} /></div>}
             <div className="grid gap-4 sm:grid-cols-2">
-              <div><label className={labelClass}>Vai trò</label><select value={userData.role} onChange={(e) => setData((p: any) => ({ ...p, role: e.target.value }))} className={fieldClass}>{Object.values(UserRole).map((r) => <option key={r} value={r}>{r}</option>)}</select></div>
+              <div><label className={labelClass}>Vai trò</label><select value={userData.role} onChange={(e) => setData((p: any) => ({ ...p, role: e.target.value }))} className={fieldClass}>{roleOptions.map((r) => <option key={r} value={r}>{r}</option>)}</select></div>
               <div><label className={labelClass}>Trạng thái</label><select disabled={isCreate} value={userData.status || UserStatus.ACTIVE} onChange={(e) => setData((p: any) => ({ ...p, status: e.target.value }))} className={`${fieldClass} disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400`}>{Object.values(UserStatus).map((s) => <option key={s} value={s}>{s}</option>)}</select></div>
             </div>
           </div>
 
           <div className="flex justify-end gap-3 border-t border-slate-100 bg-slate-50 px-7 py-5">
             <button type="button" onClick={close} className="rounded-2xl px-6 py-3 text-sm font-black text-slate-500 hover:bg-white">Hủy</button>
-            <button type="submit" disabled={busy} className="rounded-2xl bg-teal-600 px-7 py-3 text-sm font-black text-white shadow-lg shadow-teal-100 transition hover:bg-teal-700 disabled:opacity-60">{busy ? "Đang lưu..." : isCreate ? "Tạo người dùng" : "Lưu thay đổi"}</button>
+            <button type="submit" disabled={busy || (!isCreate && !canManageTarget(editingUser))} className="rounded-2xl bg-teal-600 px-7 py-3 text-sm font-black text-white shadow-lg shadow-teal-100 transition hover:bg-teal-700 disabled:opacity-60">{busy ? "Đang lưu..." : isCreate ? "Tạo người dùng" : "Lưu thay đổi"}</button>
           </div>
         </form>
       </div>
@@ -223,7 +235,7 @@ const AdminUserManagement: React.FC<Props> = ({ users: initialUsers = [] }) => {
           </div>
           <div className="grid grid-cols-2 gap-3 sm:min-w-[360px]">
             <div className="rounded-[1.5rem] bg-white/10 p-4 ring-1 ring-white/10"><p className="text-[10px] font-black uppercase tracking-widest text-slate-300">Tổng tài khoản</p><p className="mt-2 text-4xl font-black tracking-tighter">{meta.total}</p></div>
-            <button onClick={() => setIsAddModalOpen(true)} className="rounded-[1.5rem] bg-amber-300 p-4 text-left text-slate-950 transition hover:-translate-y-0.5 hover:bg-amber-200"><i className="fa-solid fa-user-plus mb-3 text-xl" /><p className="text-xs font-black uppercase tracking-widest">Thêm user</p></button>
+            {hasPermission("user:create") && <button onClick={() => setIsAddModalOpen(true)} className="rounded-[1.5rem] bg-amber-300 p-4 text-left text-slate-950 transition hover:-translate-y-0.5 hover:bg-amber-200"><i className="fa-solid fa-user-plus mb-3 text-xl" /><p className="text-xs font-black uppercase tracking-widest">Thêm user</p></button>}
           </div>
         </div>
       </section>
@@ -254,7 +266,7 @@ const AdminUserManagement: React.FC<Props> = ({ users: initialUsers = [] }) => {
                   <td className="px-6 py-5"><span className={`rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-widest ${getStatusTheme(u.status)}`}>{u.status}</span></td>
                   <td className="px-6 py-5"><div className="flex items-center text-sm font-black text-amber-500"><i className="fa-solid fa-star mr-1" />{typeof u.rating === "number" ? u.rating.toFixed(1) : "-"}</div></td>
                   <td className="px-6 py-5 text-xs font-bold text-slate-400">{u.createdAt ? new Date(u.createdAt).toLocaleDateString("vi-VN") : "-"}</td>
-                  <td className="px-6 py-5"><div className="flex gap-2"><button onClick={() => handleViewUser(u.id)} className="flex h-10 w-10 items-center justify-center rounded-2xl bg-cyan-50 text-cyan-600 transition hover:bg-cyan-600 hover:text-white"><i className="fa-solid fa-eye" /></button><button onClick={() => setEditingUser(u)} className="flex h-10 w-10 items-center justify-center rounded-2xl bg-teal-50 text-teal-700 transition hover:bg-teal-600 hover:text-white"><i className="fa-solid fa-user-pen" /></button><button onClick={() => handlePatchStatus(u.id, u.status === UserStatus.BLOCKED ? UserStatus.ACTIVE : UserStatus.BLOCKED)} className={`flex h-10 w-10 items-center justify-center rounded-2xl transition hover:text-white ${u.status === UserStatus.BLOCKED ? "bg-emerald-50 text-emerald-600 hover:bg-emerald-600" : "bg-orange-50 text-orange-600 hover:bg-orange-600"}`}><i className={`fa-solid ${u.status === UserStatus.BLOCKED ? "fa-unlock" : "fa-ban"}`} /></button><button onClick={() => handleDeleteUser(u.id)} className="flex h-10 w-10 items-center justify-center rounded-2xl bg-rose-50 text-rose-600 transition hover:bg-rose-600 hover:text-white"><i className="fa-solid fa-trash" /></button></div></td>
+                  <td className="px-6 py-5"><div className="flex gap-2"><button onClick={() => handleViewUser(u.id)} className="flex h-10 w-10 items-center justify-center rounded-2xl bg-cyan-50 text-cyan-600 transition hover:bg-cyan-600 hover:text-white"><i className="fa-solid fa-eye" /></button>{hasPermission("user:update") && canManageTarget(u) && <button onClick={() => setEditingUser(u)} className="flex h-10 w-10 items-center justify-center rounded-2xl bg-teal-50 text-teal-700 transition hover:bg-teal-600 hover:text-white"><i className="fa-solid fa-user-pen" /></button>}{hasPermission("user:status:update") && canManageTarget(u) && <button onClick={() => handlePatchStatus(u.id, u.status === UserStatus.BLOCKED ? UserStatus.ACTIVE : UserStatus.BLOCKED)} className={`flex h-10 w-10 items-center justify-center rounded-2xl transition hover:text-white ${u.status === UserStatus.BLOCKED ? "bg-emerald-50 text-emerald-600 hover:bg-emerald-600" : "bg-orange-50 text-orange-600 hover:bg-orange-600"}`}><i className={`fa-solid ${u.status === UserStatus.BLOCKED ? "fa-unlock" : "fa-ban"}`} /></button>}{hasPermission("user:delete") && canManageTarget(u) && <button onClick={() => handleDeleteUser(u.id)} className="flex h-10 w-10 items-center justify-center rounded-2xl bg-rose-50 text-rose-600 transition hover:bg-rose-600 hover:text-white"><i className="fa-solid fa-trash" /></button>}</div></td>
                 </tr>
               ))}
             </tbody>
@@ -277,3 +289,6 @@ const AdminUserManagement: React.FC<Props> = ({ users: initialUsers = [] }) => {
 };
 
 export default AdminUserManagement;
+
+
+

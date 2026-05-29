@@ -27,7 +27,7 @@ interface BuyerReview {
 const ProductDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, hasPermission } = useAuth();
 
   const [product, setProduct] = useState<Product | null>(null);
   const [activeImage, setActiveImage] = useState(0);
@@ -167,10 +167,11 @@ const ProductDetailPage: React.FC = () => {
   }
 
   const isOwner = product.owner;
-  const isAdmin = user?.roles?.includes("ADMIN") || user?.role === "ADMIN" || (user as any)?.roles === "ADMIN";
-  const canManage = isOwner || isAdmin;
+  const canAdminManageProduct = hasPermission("product:update") || hasPermission("product:delete") || hasPermission("product:status:update");
+  const canManage = isOwner || canAdminManageProduct;
   const isSold = product.status === "SOLD";
-  const canEdit = product.status === "PENDING" || product.status === "DRAFT";
+  const canEdit = (isOwner || hasPermission("product:update")) && (product.status === "PENDING" || product.status === "DRAFT");
+  const canDeleteProduct = (isOwner || hasPermission("product:delete")) && !isSold;
   const sellerAvatar = `https://api.dicebear.com/7.x/avataaars/svg?seed=${product.sellerName}`;
   const averageReview = buyerReviews.length ? (buyerReviews.reduce((sum, review) => sum + Number(review.rating || 0), 0) / buyerReviews.length).toFixed(1) : "0.0";
 
@@ -211,7 +212,7 @@ const ProductDetailPage: React.FC = () => {
 
       <div className="grid grid-cols-1 gap-10 lg:grid-cols-12">
         <ProductImageGallery activeImage={activeImage} product={product} getImageUrl={getImageUrl} onSelectImage={setActiveImage} />
-        <ProductInfoPanel canEdit={canEdit} canManage={canManage} isAdmin={isAdmin} isOwner={isOwner} isSold={isSold} product={product} sellerAvatar={sellerAvatar} onContactSeller={handleContactSeller} onDelete={handleDelete} onEdit={() => setShowEditModal(true)} />
+        <ProductInfoPanel canEdit={canEdit} canDelete={canDeleteProduct} canManage={canManage} isAdmin={canAdminManageProduct} isOwner={isOwner} isSold={isSold} product={product} sellerAvatar={sellerAvatar} onContactSeller={handleContactSeller} onDelete={handleDelete} onEdit={() => setShowEditModal(true)} />
       </div>
 
       {isSold && (loadingReviews || buyerReviews.length > 0) && (

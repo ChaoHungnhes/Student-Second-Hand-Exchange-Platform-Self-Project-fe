@@ -189,9 +189,9 @@ const AdminTransactions: React.FC<Props> = ({ transactions: initialTransactions 
 
       <section className="overflow-hidden rounded-[2rem] border border-slate-100 bg-white shadow-xl shadow-slate-900/5">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[980px] text-left">
+          <table className="w-full min-w-[1180px] table-fixed text-left">
             <thead className="border-b border-slate-100 bg-slate-50">
-              <tr>{["Sản phẩm / Giá", "Người bán", "Người mua", "Trạng thái", "Thời gian", "Thao tác"].map((h) => <th key={h} className="px-6 py-5 text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">{h}</th>)}</tr>
+              <tr><th className="w-[360px] px-6 py-5 text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">Sản phẩm / Giá</th><th className="w-[190px] px-6 py-5 text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">Người bán</th><th className="w-[190px] px-6 py-5 text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">Người mua</th><th className="w-[170px] px-6 py-5 text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">Trạng thái</th><th className="w-[150px] px-6 py-5 text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">Thời gian</th><th className="w-[120px] px-6 py-5 text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">Thao tác</th></tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
               {loading ? (
@@ -200,9 +200,9 @@ const AdminTransactions: React.FC<Props> = ({ transactions: initialTransactions 
                 <tr><td colSpan={6} className="px-6 py-16 text-center"><i className="fa-solid fa-receipt mb-4 text-5xl text-slate-100" /><p className="text-xs font-black uppercase tracking-widest text-slate-400">Không tìm thấy giao dịch nào</p></td></tr>
               ) : transactions.map((t) => (
                 <tr key={t.id} className="transition hover:bg-slate-50/70">
-                  <td className="px-6 py-5"><div className="max-w-[240px]"><button onClick={() => navigate(`/products/${t.productId}`)} className="block truncate text-left text-sm font-black text-slate-950 hover:text-teal-700">{t.productTitle}</button><p className="mt-1 text-sm font-black text-teal-700">{t.productPrice.toLocaleString()}đ</p><p className="mt-0.5 truncate text-[10px] font-bold uppercase tracking-wider text-slate-300">ID: {t.id}</p></div></td>
-                  <td className="px-6 py-5"><button onClick={() => navigate(`/user/${t.sellerId}`)} className="group text-left"><p className="text-sm font-bold text-slate-700 group-hover:text-teal-700">{t.sellerName}</p><p className="text-[10px] font-bold text-slate-400">ID: {t.sellerId}</p></button></td>
-                  <td className="px-6 py-5"><button onClick={() => navigate(`/user/${t.buyerId}`)} className="group text-left"><p className="text-sm font-bold text-slate-700 group-hover:text-teal-700">{t.buyerName}</p><p className="text-[10px] font-bold text-slate-400">ID: {t.buyerId}</p></button></td>
+                  <td className="px-6 py-5 align-top"><div className="min-w-0 max-w-[320px]"><button onClick={() => navigate(`/products/${t.productId}`)} title={t.productTitle} className="block w-full truncate text-left text-sm font-black text-slate-950 hover:text-teal-700">{t.productTitle}</button><p className="mt-1 text-sm font-black text-teal-700">{t.productPrice.toLocaleString()}đ</p><p className="mt-0.5 truncate text-[10px] font-bold uppercase tracking-wider text-slate-300" title={t.id}>ID: {t.id}</p></div></td>
+                  <td className="px-6 py-5 align-top"><button onClick={() => navigate(`/user/${t.sellerId}`)} className="group block min-w-0 max-w-[150px] text-left"><p className="truncate text-sm font-bold text-slate-700 group-hover:text-teal-700" title={t.sellerName}>{t.sellerName}</p><p className="break-all text-[10px] font-bold text-slate-400">ID: {t.sellerId}</p></button></td>
+                  <td className="px-6 py-5 align-top"><button onClick={() => navigate(`/user/${t.buyerId}`)} className="group block min-w-0 max-w-[150px] text-left"><p className="truncate text-sm font-bold text-slate-700 group-hover:text-teal-700" title={t.buyerName}>{t.buyerName}</p><p className="break-all text-[10px] font-bold text-slate-400">ID: {t.buyerId}</p></button></td>
                   <td className="px-6 py-5"><select value={t.status} onChange={(e) => handleChangeStatus(t.id, e.target.value as TransactionStatus)} className={`rounded-xl border px-3 py-2 text-[10px] font-black uppercase tracking-widest outline-none ${getStatusStyle(t.status)}`}>{Object.values(TransactionStatus).map((s) => <option key={s} value={s}>{s}</option>)}</select></td>
                   <td className="px-6 py-5 text-xs font-bold text-slate-400">{new Date(t.createdAt).toLocaleString("vi-VN")}</td>
                   <td className="px-6 py-5"><div className="flex gap-2"><button onClick={() => viewDetails(t.productId)} className="flex h-10 w-10 items-center justify-center rounded-2xl bg-teal-50 text-teal-700 transition hover:bg-teal-600 hover:text-white" title="Xem chi tiết"><i className="fa-solid fa-eye" /></button><button onClick={() => handleDeleteTransaction(t.id)} className="flex h-10 w-10 items-center justify-center rounded-2xl bg-rose-50 text-rose-600 transition hover:bg-rose-600 hover:text-white" title="Xóa"><i className="fa-solid fa-trash-can" /></button></div></td>
@@ -266,3 +266,5 @@ const AdminTransactions: React.FC<Props> = ({ transactions: initialTransactions 
 };
 
 export default AdminTransactions;
+
+

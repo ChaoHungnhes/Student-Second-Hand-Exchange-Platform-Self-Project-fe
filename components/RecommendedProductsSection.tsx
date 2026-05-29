@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { getRecommendedProductsAPI } from "../config/api";
+import { getProductsAPI, getRecommendedProductsAPI } from "../config/api";
 import { useAuth } from "../context/AuthContext";
 import type { MetaData, Product, ProductResponse } from "../types/index";
 import ProductCard from "./ProductCard";
@@ -40,23 +40,29 @@ const RecommendedProductsSection: React.FC = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (authLoading || !user) {
-      setProducts([]);
-      setMeta(DEFAULT_META);
-      return;
-    }
+    if (authLoading) return;
 
     const fetchRecommendations = async () => {
       setLoading(true);
       try {
-        const response = await getRecommendedProductsAPI(1, 10);
+        const response = user
+          ? await getRecommendedProductsAPI(1, 10)
+          : await getProductsAPI({ page: 1, size: 10, sortBy: "createdAt", sortDir: "desc" });
         const normalized = normalizeRecommendationsResponse(response);
         setProducts(normalized.result || []);
         setMeta(normalized.meta || DEFAULT_META);
       } catch (error) {
-        console.error("Loi tai goi y san pham:", error);
-        setProducts([]);
-        setMeta(DEFAULT_META);
+        console.error("Lỗi tải gợi ý sản phẩm:", error);
+        try {
+          const fallback = await getProductsAPI({ page: 1, size: 10, sortBy: "createdAt", sortDir: "desc" });
+          const normalized = normalizeRecommendationsResponse(fallback);
+          setProducts(normalized.result || []);
+          setMeta(normalized.meta || DEFAULT_META);
+        } catch (fallbackError) {
+          console.error("Lỗi tải sản phẩm thay thế:", fallbackError);
+          setProducts([]);
+          setMeta(DEFAULT_META);
+        }
       } finally {
         setLoading(false);
       }
@@ -65,7 +71,7 @@ const RecommendedProductsSection: React.FC = () => {
     fetchRecommendations();
   }, [authLoading, user]);
 
-  if (authLoading || !user) {
+  if (authLoading) {
     return null;
   }
 
